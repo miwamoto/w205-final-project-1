@@ -1,0 +1,21 @@
+#! /bin/bash
+
+#set up directories for postgres
+mkdir /data/pittsburgh_db
+mkdir /data/pittsburgh_db/data
+mkdir /data/pittsburgh_db/logs
+sudo chown -R postgres /data/pittsburgh_db
+sudo -u postgres initdb -D /data/pittsburgh_db/data
+
+#setup pg_hba.conf
+sudo -u postgres echo "host    all         all         0.0.0.0         0.0.0.0               md5" >> /data/pittsburgh_db/data/pg_hba.conf
+
+#setup postgresql.conf
+sudo -u postgres echo "listen_addresses = '*'" >> /data/pittsburgh_db/data/postgresql.conf
+sudo -u postgres echo "standard_conforming_strings = off" >> /data/pittsburgh_db/data/postgresql.conf
+
+# #start postgres
+/home/ec2-user/bin/start_postgres
+
+# #create pittsburgh database
+/home/ec2-user/anaconda3/bin/python /home/ec2-user/bin/setup_database

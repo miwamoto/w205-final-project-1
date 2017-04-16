@@ -1,0 +1,4 @@
+Year,Month,Day,Temp. (F) High,Temp. (F) Avg,Temp. (F) Low,Dew Point (F) High,Dew Point (F) Avg,Dew Point (F) Low,Humidity (%) High,Humidity (%) Avg,Humidity (%) Low,Sea Level Press. (in) High,Sea Level Press. (in) Avg,Sea Level Press. (in) Low,Visibility (mi) High,Visibility (mi) Avg,Visibility (mi) Low,Wind (mph) High,Wind (mph) Avg,Wind (mph) Low,Precip. (in),Events
+2017,Jan,1,44,38,32,33,29,25,89,73,51,30.29,30.12,29.90,10,9,3,15,9,24,0.03,Rain
+2017,Jan,2,46,42,37,44,39,27,93,88,65,30.23,30.16,30.03,10,5,0,10,7,NULL,0.09,"Fog,Rain"
+2017,Jan,3,50,46,43,47,43,38,93,91,82,29.99,29.63,29.50,10,4,0,15,7,23,0.76,"Fog,Rain"

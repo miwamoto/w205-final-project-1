@@ -1,0 +1,2 @@
+#! /bin/bash
+sudo -u postgres pg_ctl -D /data/pittsburgh_db/data -l /data/pittsburgh_db/logs/pgsql.log stop
