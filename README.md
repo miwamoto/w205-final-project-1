@@ -98,3 +98,22 @@ cd html_example
 python main.py
 ```
 You can now access the website via your instance's public DNS address, at the port 8080 (e.g., ec2-XX-XXX-XX-XXX.compute-1.amazonaws.com:8080)
+
+
+## Getting data
+
+### Wunderground
+
+
+Make sure Postgres server is already running!
+```bash
+start_postgres
+```
+
+Then run:
+```bash
+cd pulling_data
+python wunderground.py
+```
+
+This will create the weather table in the pittsburgh database, and will fetch daily historical data from 1990 - 2017
