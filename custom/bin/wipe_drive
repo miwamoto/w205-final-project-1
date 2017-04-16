@@ -1,0 +1,11 @@
+mkdir /data
+
+cd $HOME
+sudo umount /data
+
+#make a new ext4 filesystem
+sudo mkfs.ext4 $1
+
+#mount the new filesystem under /data
+mount -t ext4 $1 /data
+chmod a+rwx /data
