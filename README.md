@@ -2,11 +2,11 @@
 
 ## Setup
 
-### Adding custom/bin to PATH
-You only need to run this once:
+### Git
+Please run this on every new AMI version
 ```bash
-echo "export PATH=$HOME/custom/bin:$PATH" >> .bashrc
-echo "export PATH=$HOME/custom/bin:$PATH" >> .zshrc
+git config --global user.name "Your Name"
+git config --global user.email "your_email@xyz.com"
 ```
 
 ### Mounting volume
