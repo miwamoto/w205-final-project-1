@@ -1,0 +1,9 @@
+*~
+*swp
+*pyc
+__pycache__
+software
+dotfiles
+anaconda3
+.*
+bin/
