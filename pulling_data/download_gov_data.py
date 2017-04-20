@@ -178,11 +178,9 @@ def update_file_in_db(basedir, fname):
     # already exists, add the new data to it.
     # Will need to figure out how to append vs update values
     
-    print('update file in db')
     filename, file_extension = os.path.splitext(fname)
 
     if file_extension.lower() == '.csv':
-        print('in if')
         df = pd.read_csv(os.path.join(basedir, fname))
         insert_to_db(df, fname)
 
@@ -228,27 +226,13 @@ def fetch_files_by_type(flat_results, data_formats = ("CSV", "KML"), basedir = '
         fname = '{}_{}.{}'.format(name, num, ext)
 
         if good_format and needs_updating(result):
-            print('fetch')
             fetch_file_by_url(url, basedir = subdir, fname = fname)
-            print('update')
             update_file_in_db(subdir, fname)
             # update_metadata_db(result)
         else:
             print("skipping {}".format(fname))
 
 
-
-# def fetch_all_urls(urls, basedir = "/tmp/pittsburgh", fname = None):
-#     for url in urls:
-#         try:
-#             fetch_file_by_url(url, basedir, fname)
-#         except UnicodeEncodeError as e:
-#             print(e)
-#             print("Py2 problem, probably")
-
-#         update_file_in_db(basedir, fname)
-    
-    
 def main():
     metadata = fetch_metadata()
     parsed = extract_metadata(metadata)
@@ -259,25 +243,6 @@ def main():
         pass
     fetch_files_by_type(flat, download_formats, basedir = BASEDIR)
 
-# with PostgreSQL(database = 'pittsburgh') as psql:
-#     types = TYPES
-#     psql.create_table(table = 'weather', cols = cols, types = types)
-
-    # for year in years:
-    #     print(year)
-    #     rows = parse_year_table(fetch_year_of_weather(year), year)
-    #     with PostgreSQL(table = 'weather', database = 'pittsburgh') as psql:
-    #         psql.add_rows(rows, types = types, cols = cols)
-
 
 if __name__ == '__main__':
     main()
-
-
-    # table = 'pittsburgh-police-arrest-data'
-    # basedir = BASEDIR
-    # f = pd.read_csv(os.path.join(basedir, fname))
-    # dtypes = [DTYPE_CONVERSION[str(dtype)] for dtype in f.dtypes]
-    # columns = f.columns
-    # with PostgreSQL(database = 'pittsburgh') as pg:
-    #     pg.create_table(table)
