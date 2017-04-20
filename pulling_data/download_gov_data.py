@@ -122,9 +122,12 @@ def get_dtype(dtype):
 
 
 def insert_to_db(df, fname):
+    print('insert')
     dtypes  = [get_dtype(dtype) for dtype in df.dtypes]
     columns = [col for col in df.columns]
     filename, file_extension = os.path.splitext(fname)
+    filename = re.sub('-', '_', filename)
+    print(filename)
 
     with PostgreSQL(database = 'pittsburgh') as pg:
         pg.create_table(filename, columns, dtypes)
@@ -142,8 +145,13 @@ def update_file_in_db(basedir, fname):
     # already exists, add the new data to it.
     # Will need to figure out how to append vs update values
     
-    df = pd.read_csv(os.path.join(basedir, fname), 'r')
-    insert_to_db(df, fname)
+    print('update file in db')
+    filename, file_extension = os.path.splitext(fname)
+
+    if file_extension.lower() == '.csv':
+        print('in if')
+        df = pd.read_csv(os.path.join(basedir, fname), 'r')
+        insert_to_db(df, fname)
 
 
 def update_metadata_db(result):
@@ -187,8 +195,10 @@ def fetch_files_by_type(flat_results, data_formats = ("CSV", "KML"), basedir = '
         fname = '{}_{}.{}'.format(name, num, ext)
 
         if good_format and needs_updating(result):
+            print('fetch')
             fetch_file_by_url(url, basedir = subdir, fname = fname)
-            # update_file_in_db(subdir, fname)
+            print('update')
+            update_file_in_db(subdir, fname)
             # update_metadata_db(result)
         else:
             print("skipping {}".format(fname))
@@ -214,7 +224,7 @@ def main():
         os.mkdir(BASEDIR)
     except:
         pass
-    fetch_files_by_type(flat, download_formats, basedir = BASEDIR)
+    fetch_files_by_type(flat[0:30], download_formats, basedir = BASEDIR)
 
 # with PostgreSQL(database = 'pittsburgh') as psql:
 #     types = TYPES
