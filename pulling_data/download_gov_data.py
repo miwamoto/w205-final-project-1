@@ -111,6 +111,18 @@ def fetch_file_by_url(url, basedir = "/tmp/pittsburgh", fname = None):
         except UnicodeEncodeError as e:
             print(e)
             print("Python 2 sucks at unicode")
+            try:
+                f.write(r.text.encode('UTF-8'))
+                print('wrote successfully anyway')
+            except MemoryError as e:
+                try_binary = True
+    if try_binary:
+        with open (fpath, 'wb') as f:
+            try:
+                print('trying to write as binary')
+                f.write(r.text)
+            except:
+                print('failed. moving on')
 
 
 def get_dtype(dtype):
@@ -225,7 +237,7 @@ def main():
         os.mkdir(BASEDIR)
     except:
         pass
-    fetch_files_by_type(flat[0:30], download_formats, basedir = BASEDIR)
+    fetch_files_by_type(flat, download_formats, basedir = BASEDIR)
 
 # with PostgreSQL(database = 'pittsburgh') as psql:
 #     types = TYPES
