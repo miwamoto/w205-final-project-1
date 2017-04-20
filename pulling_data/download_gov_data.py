@@ -158,9 +158,6 @@ def insert_to_db(df, fname):
     columns = [re.sub(' ', '_', col) for col in df.columns]
     filename, file_extension = os.path.splitext(fname)
 
-    #Underscores only permissible non-alphanumeric
-    filename = re.sub('[^a-zA-Z0-9]', '_', filename)
-
     df.fillna('NULL')
     with PostgreSQL(database = 'pittsburgh') as pg:
         pg.create_table(filename, cols = columns, types = dtypes)
@@ -224,6 +221,10 @@ def fetch_files_by_type(flat_results, data_formats = ("CSV", "KML"), basedir = '
         # or if no types specified
         good_format = data_formats is None or f_format in data_formats
         fname = '{}_{}.{}'.format(name, num, ext)
+
+        #Underscores only permissible non-alphanumeric
+        fname = re.sub('[^a-zA-Z0-9]', '_', fname)
+
 
         if good_format and needs_updating(result):
             fetch_file_by_url(url, basedir = subdir, fname = fname)
