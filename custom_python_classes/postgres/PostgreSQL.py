@@ -171,7 +171,7 @@ class PostgreSQL(object):
             self.cols = cols
 
         for row in rows:
-            if not self.add(row):
+            if not self.add(tuple(row)):
                 print('Failed to add row: {}'.format(row))
                 print('with header: {}'.format(self.cols))
 
