@@ -3,6 +3,7 @@
 
 import psycopg2
 from collections import defaultdict
+import sys
 
 class PostgreSQL(object):
     """Update database in safely
@@ -86,8 +87,8 @@ class PostgreSQL(object):
         """Create table with specified cols and types"""
 
         self.set_table(table)
-        self.cols = cols
-        self.types = types
+        self.cols = tuple(cols)
+        self.types = tuple(types)
 
         col_types = ','.join(
             "{} {}".format(col, t) for col, t in zip(self.cols, self.types))
@@ -157,7 +158,7 @@ class PostgreSQL(object):
         else:
             cols = ''
 
-        vals = self.parse_rows(row)
+        vals = self.parse_rows(tuple(row))
 
         query = 'INSERT INTO {} {} VALUES({})'.format(self.table, cols, vals)
 
@@ -171,7 +172,8 @@ class PostgreSQL(object):
             self.cols = cols
 
         for row in rows:
-            if not self.add(tuple(row)):
+            row = tuple(row)
+            if not self.add(row):
                 print('Failed to add row: {}'.format(row))
                 print('with header: {}'.format(self.cols))
 

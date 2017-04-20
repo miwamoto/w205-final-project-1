@@ -122,15 +122,16 @@ def get_dtype(dtype):
 
 
 def insert_to_db(df, fname):
-    print('insert')
     dtypes  = [get_dtype(dtype) for dtype in df.dtypes]
-    columns = [col for col in df.columns]
+    columns = [re.sub(' ', '_', col) for col in df.columns]
     filename, file_extension = os.path.splitext(fname)
-    filename = re.sub('-', '_', filename)
-    print(filename)
 
+    #Underscores only permissible non-alphanumeric
+    filename = re.sub('[^a-zA-Z0-9]', '_', filename)
+
+    df.fillna('NULL')
     with PostgreSQL(database = 'pittsburgh') as pg:
-        pg.create_table(filename, columns, dtypes)
+        pg.create_table(filename, cols = columns, types = dtypes)
         pg.add_rows(tuple(df.itertuples(index = False)))
 
 
@@ -150,7 +151,7 @@ def update_file_in_db(basedir, fname):
 
     if file_extension.lower() == '.csv':
         print('in if')
-        df = pd.read_csv(os.path.join(basedir, fname), 'r')
+        df = pd.read_csv(os.path.join(basedir, fname))
         insert_to_db(df, fname)
 
 
