@@ -19,15 +19,17 @@ search_url = api_url + query_url
 # arrest_url = 'https://data.wprdc.org/datastore/dump/e03a89dd-134a-4ee8-a2bd-62c40aeebc6f'
 
 # In case we need to rename extensions
-EXTENSIONS = {'CSV': 'csv', 'HTML': 'html'}
+EXTENSIONS = {'CSV': 'csv', 'HTML': 'html', 'ZIP': 'zip'}
 
 DTYPE_CONVERSION = {'int64': "INT", 'float64': "FLOAT", 'object': "VARCHAR"}
+
+BINARY_FORMATS = ('ZIP', 'GIF', 'JPG')
 
 # Where the data will be saved
 BASEDIR = '/data/pb_files'
 
 # Formats to download
-download_formats = ('CSV',)
+download_formats = ('ZIP',)
 
 # Special tuple type to store rows of our metadata
 FetchableData = namedtuple("data", [
@@ -98,31 +100,49 @@ def needs_updating(flat_row):
     return True
 
 
+def write_binary(url, fpath):
+    response = requests.get(url, stream=True)
+    with open(fpath, 'wb') as f:
+        if not response.ok:
+            pass
+    # Something went wrong
+        else:
+            for block in response.iter_content(1024):
+                f.write(block)
+
+
+def write_text(url, fpath):
+    r = requests.get(url)
+    try:
+        with open(fpath, 'w') as f:
+            f.write(r.text)
+            print('Fetched: {}'.format(fname))
+    except UnicodeEncodeError as e:
+        with open(fpath, 'w') as f:
+            try:
+                f.write(r.text.encode('UTF-8'))
+                print('Fetched: {}'.format(fname))
+            except:
+                print('failed. moving on')
+    except MemoryError as e:
+        try:
+            write_binary(url, fpath)
+        except:
+            print('failed. moving on')
+
+
 def fetch_file_by_url(url, basedir = "/tmp/pittsburgh", fname = None):
     """Save file from url in designated location"""
-    r = requests.get(url)
     if fname is None:
         fname = os.path.basename(url)
     fpath = os.path.join(basedir, fname)
-    with open (fpath, 'w') as f:
-        try:
-            f.write(r.text)
-            print('Fetched: {}'.format(fname))
-        except UnicodeEncodeError as e:
-            print(e)
-            print("Python 2 sucks at unicode")
-            try:
-                f.write(r.text.encode('UTF-8'))
-                print('wrote successfully anyway')
-            except MemoryError as e:
-                try_binary = True
-    if try_binary:
-        with open (fpath, 'wb') as f:
-            try:
-                print('trying to write as binary')
-                f.write(r.text)
-            except:
-                print('failed. moving on')
+
+    _, file_ext = os.path.splitext(fname)
+
+    if file_ext[1:].upper() in BINARY_FORMATS:
+        write_binary(url, fpath)
+    else:
+        write_text(url, fpath)
 
 
 def get_dtype(dtype):
