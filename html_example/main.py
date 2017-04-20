@@ -14,9 +14,6 @@ import os, os.path
 import random
 import string
 
-from arcgis.gis import GIS
-
-
 
 class Root:
     @cherrypy.expose
@@ -45,7 +42,24 @@ class Root:
                            target='Temperature by Year',
                            title = "Weather",
                            plot = html,
+                           sidebar = None,
         )
+
+
+    def map(self, webmap = '7694ded02a524c97ae145fa3648081a9'):
+        plot = ''.format(webmap)
+        
+        env = Environment(loader=FileSystemLoader('templates'))
+
+        tmpl = env.get_template('index.html')
+        print(tmpl)
+        return tmpl.render(salutation='Pittsburgh: ',
+                           target='Median Age Map',
+                           title = "Median Age",
+                           plot = html,
+                           sidebar = None,
+        )
+    
 
 cherrypy.config.update({
     'server.socket_host': '0.0.0.0',
