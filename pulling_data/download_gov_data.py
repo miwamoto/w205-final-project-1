@@ -1,6 +1,6 @@
 import requests
 import re
-# from postgres.PostgreSQL import PostgreSQL
+from postgres.PostgreSQL import PostgreSQL
 import json
 import pandas as pd
 import os
@@ -122,13 +122,14 @@ def get_dtype(dtype):
 
 
 def insert_to_db(df, fname):
-    dtypes = [get_dtype(dtype) for dtype in df.dtypes]
-    columns = df.columns
+    dtypes  = [get_dtype(dtype) for dtype in df.dtypes]
+    columns = [col for col in df.columns]
     filename, file_extension = os.path.splitext(fname)
 
     with PostgreSQL(database = 'pittsburgh') as pg:
         pg.create_table(filename, columns, dtypes)
-    
+        pg.add_rows(tuple(df.itertuples(index = False)))
+
 
 def update_file_in_db(basedir, fname):
     """Use new file to update database"""
