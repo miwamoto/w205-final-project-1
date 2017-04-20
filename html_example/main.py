@@ -46,6 +46,7 @@ class Root:
         )
 
 
+    @cherrypy.expose
     def map(self, webmap = '7694ded02a524c97ae145fa3648081a9'):
         plot = ''.format(webmap)
         
