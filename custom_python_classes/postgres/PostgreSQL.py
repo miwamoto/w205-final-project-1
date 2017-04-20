@@ -4,6 +4,7 @@
 import psycopg2
 from collections import defaultdict
 import sys
+import logging
 
 class PostgreSQL(object):
     """Update database in safely
@@ -15,7 +16,8 @@ class PostgreSQL(object):
 
     def __init__(self, table = None, database = "pittsburgh", user = 'postgres',
                  password = 'postgres', host = 'localhost',
-                 port = '5432', cols = None, types = None):
+                 port = '5432', cols = None, types = None,
+                 log_file = '/tmp/postgres.log'):
 
         self.database = database
         self.table    = table
@@ -25,6 +27,9 @@ class PostgreSQL(object):
         self.port     = port
         self.cols     = cols
         self.types    = types
+
+        self.log_file    = log_file
+        logging.basicConfig(filename=self.log_file, level=logging.DEBUG)
 
         self._str_types = {'TEXT', 'CHAR', 'CHARACTER',
                            'CHARACTER VARYING', 'VARCHAR'}
@@ -80,7 +85,9 @@ class PostgreSQL(object):
         try:
             self.conn.close()
         except AttributeError as e:
-            print('Connection may not have been open')
+            msg = 'Connection may not have been open'
+            print(msg)
+            logging.debug(msg)
 
 
     def create_table(self, table, cols, types):
@@ -174,8 +181,8 @@ class PostgreSQL(object):
         for row in rows:
             row = tuple(row)
             if not self.add(row):
-                print('Failed to add row: {}'.format(row))
-                print('with header: {}'.format(self.cols))
+                logging.debug('Failed to add row: {}'.format(row))
+                logging.debug('with header: {}'.format(self.cols))
 
          
     
