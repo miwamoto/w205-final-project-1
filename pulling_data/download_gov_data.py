@@ -91,6 +91,27 @@ def fetch_file_by_url(url, basedir = "/tmp/pittsburgh", fname = None):
             print("Python 2 sucks at unicode")
 
 
+def update_file_in_db(basedir, fname):
+    """Use new file to update database"""
+    #TODO actually update DB
+    # Pandas is good about inferring types
+    # and can interface directly with sqlalchemy
+    # I was thinking we could use the name of the dataset as the table
+    # name--Try to create the table based on inferred types. If it
+    # already exists, add the new data to it.
+    # Will need to figure out how to append vs update values
+    
+    f = pd.read_csv(os.path.join(basedir, fname), 'r')
+    print(f.head())
+
+
+def update_metadata_db(result):
+    """Updates last fetched time in metadata DB"""
+    # TODO Mark The file as newly update so we don't have to fetch it
+    # again until it's update on the site
+    pass
+    
+
 def fetch_files_by_type(flat_results, data_formats = ("CSV", "KML"), basedir = '/data/pb_files'):
     urls = defaultdict(list)
     try:
@@ -124,23 +145,10 @@ def fetch_files_by_type(flat_results, data_formats = ("CSV", "KML"), basedir = '
         if good_format and needs_updating(result):
             fetch_file_by_url(url, basedir = subdir, fname = fname)
             # update_file_in_db(subdir, fname)
+            # update_metadata_db(result)
         else:
             print("skipping {}".format(fname))
 
-
-def update_file_in_db(basedir, fname):
-    """Use new file to update database"""
-    #TODO actually update DB
-    # Pandas is good about inferring types
-    # and can interface directly with sqlalchemy
-    # I was thinking we could use the name of the dataset as the table
-    # name--Try to create the table based on inferred types. If it
-    # already exists, add the new data to it.
-    # Will need to figure out how to append vs update values
-    
-    f = pd.read_csv(os.path.join(basedir, fname), 'r')
-    print(f.head())
-    
 
 
 # def fetch_all_urls(urls, basedir = "/tmp/pittsburgh", fname = None):
