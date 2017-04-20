@@ -29,7 +29,7 @@ BINARY_FORMATS = ('ZIP', 'GIF', 'JPG')
 BASEDIR = '/data/pb_files'
 
 # Formats to download
-download_formats = ('ZIP',)
+download_formats = ('CSV',)
 
 # Special tuple type to store rows of our metadata
 FetchableData = namedtuple("data", [
