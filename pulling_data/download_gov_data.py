@@ -116,12 +116,12 @@ def write_text(url, fpath):
     try:
         with open(fpath, 'w') as f:
             f.write(r.text)
-            print('Fetched: {}'.format(fname))
+            print('Fetched: {}'.format(fpath))
     except UnicodeEncodeError as e:
         with open(fpath, 'w') as f:
             try:
                 f.write(r.text.encode('UTF-8'))
-                print('Fetched: {}'.format(fname))
+                print('Fetched: {}'.format(fpath))
             except:
                 print('failed. moving on')
     except MemoryError as e:
