@@ -24,6 +24,7 @@ FetchableData = namedtuple("data", ['name', 'metadata_modified', 'file_format', 
 
 def fetch_metadata(url = search_url, rows = 1000):
     """Fetch daily or summary stats for a year in Pittsburgh"""
+
     url += '&rows={}'.format(rows)
     r = requests.post(url)
     my_json = json.loads(r.text)
@@ -31,6 +32,8 @@ def fetch_metadata(url = search_url, rows = 1000):
 
 
 def extract_metadata(md):
+    """Pull useful things from each search result"""
+
     assert md['success'] is True
     results = md['result']['results']
     output = []
@@ -71,6 +74,7 @@ def flatten_extracted_data(extracted):
 
 def needs_updating(flat_row):
     """Query the database to see if we should download new data"""
+
     # TODO: Hook up to database
     # Probably want to use id and and metadata_modified to check
     # database? Or maybe revision_id?
@@ -78,6 +82,7 @@ def needs_updating(flat_row):
 
 
 def fetch_file_by_url(url, basedir = "/tmp/pittsburgh", fname = None):
+    """Save file from url in designated location"""
     r = requests.get(url)
     if fname is None:
         fname = os.path.basename(url)
@@ -93,6 +98,7 @@ def fetch_file_by_url(url, basedir = "/tmp/pittsburgh", fname = None):
 
 def update_file_in_db(basedir, fname):
     """Use new file to update database"""
+
     #TODO actually update DB
     # Pandas is good about inferring types
     # and can interface directly with sqlalchemy
@@ -107,12 +113,15 @@ def update_file_in_db(basedir, fname):
 
 def update_metadata_db(result):
     """Updates last fetched time in metadata DB"""
+
     # TODO Mark The file as newly update so we don't have to fetch it
     # again until it's update on the site
     pass
     
 
 def fetch_files_by_type(flat_results, data_formats = ("CSV", "KML"), basedir = '/data/pb_files'):
+    """Fetch files of specified type"""
+
     urls = defaultdict(list)
     try:
         os.mkdir(basedir)
