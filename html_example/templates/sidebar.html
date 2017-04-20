@@ -1,0 +1,42 @@
+<h3>X Value</h3>
+{% for item in X %}
+<a class="X link" value="{{ item }}">{{ item }} </a>
+{% endfor %}
+
+
+<h3>Y Value</h3>
+{% for item in Y %}
+<a class="Y link" value="{{ item }}">{{ item }} </a>
+{% endfor %}
+
+
+<script type="text/javascript">
+ $('.X.link').click(function (event) {
+     event.preventDefault();
+     append_to_url('X', $(this).attr('value') ); return false;
+});
+ $('.Y.link').click(function (event) {
+     event.preventDefault();
+     append_to_url('Y', $(this).attr('value') ); return false;
+});
+ function get_search_params() {
+     var params = {};
+
+     // Get all key/value pairs, as separate items
+     var items = window.location.search.slice(1).split('&')
+     for(var i = 0; i < items.length; i++)
+	 {
+	     // Split each one and store it in params
+	     var kv = items[i].split('=');
+	     params[kv[0]] = kv[1];
+	 }
+     return params;
+ } 
+
+ function append_to_url(key, val) {
+     var url = window.location.origin
+     var params = get_search_params()
+     params[key] = val;
+     window.location = url + "?" + $.param(params);
+ }
+</script>

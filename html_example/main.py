@@ -2,10 +2,11 @@ import cherrypy
 from jinja2 import Environment, FileSystemLoader
 from postgres.PostgreSQL import PostgreSQL
 
-from bokeh.plotting import figure
 from bokeh.resources import CDN
 from bokeh.embed import file_html
 from bokeh.models import Range1d
+from bokeh.layouts import gridplot
+from bokeh.plotting import figure, show, output_file
 
 import numpy as np
 import pandas as pd
@@ -15,22 +16,35 @@ import random
 import string
 
 
+def get_df(psql, table):
+    query = "select column_name from information_schema.columns \
+    where table_name = '{}'".format(table)
+    psql.execute(query)
+    columns = [col[0] for col in psql.cur.fetchall()]
+    df = pd.DataFrame(psql.select())
+    df.columns = columns
+    return df
+
+
 class Root:
     @cherrypy.expose
-    def index(self):
-        with PostgreSQL(table = 'weather', database = 'pittsburgh') as psql:
-            psql.execute("select column_name from information_schema.columns \
-            where table_name = 'weather'")
-            columns = [col[0] for col in psql.cur.fetchall()]
-            weather = pd.DataFrame(psql.select())
-            weather.columns = columns
+    def index(self, table = 'weather', X = 'temp_f_avg', Y = None):
+        with PostgreSQL(table = table, database = 'pittsburgh') as psql:
+            df = get_df(psql, table)
 
+        if Y is None:
+            title = X
+            plot = figure(title=X, background_fill_color="#E8DDCB")
 
-        plot = figure()
-        plot.cross(weather['year'], weather['temp_f_high'])
-        # plot.line(range(0,10), range(0,10))
-        # my_rand2 = np.random.random_sample((2,100)) * 10
-        # plot.cross(*my_rand2)
+            hist, edges = np.histogram(df[X].dropna(), density=True, bins=50)
+
+            plot.quad(top=hist, bottom=0, left=edges[:-1], right=edges[1:],
+                    fill_color="#036564", line_color="#033649")
+        else:
+            title = "{} by {}".format(X, Y)
+            plot = figure()
+            plot.cross(df[X], df[Y])
+            
 
         html = file_html(plot, CDN, "my plot")
 
@@ -38,11 +52,12 @@ class Root:
 
         tmpl = env.get_template('index.html')
         print(tmpl)
-        return tmpl.render(salutation='Pittsburgh: ',
-                           target='Temperature by Year',
-                           title = "Weather",
-                           plot = html,
-                           sidebar = None,
+        return tmpl.render(salutation ='Pittsburgh: ',
+                           target     = title, 
+                           title      = "Pittsburgh",
+                           plot       = html,
+                           X    = tuple(df.columns),
+                           Y    = tuple(df.columns),
         )
 
 
