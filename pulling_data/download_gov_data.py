@@ -155,7 +155,7 @@ def get_dtype(dtype):
 
 def insert_to_db(metadata, df, fname):
     dtypes  = [get_dtype(dtype) for dtype in df.dtypes]
-    columns = [re.sub('[^a-zA-z0-9]', '_', col) for col in df.columns]
+    columns = [re.sub('[^a-zA-z0-9]', '_', col).lower() for col in df.columns]
     nums = [str(n) for n in range(10)]
     columns = ["_" + col if col[0] in nums else col for col in columns]
     filename, file_extension = os.path.splitext(fname)
