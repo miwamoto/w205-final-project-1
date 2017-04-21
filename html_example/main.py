@@ -26,13 +26,34 @@ def get_df(psql, table):
     return df
 
 
+def isNumeric(dtype):
+    print(dtype)
+    if str(dtype) in ('int64', 'float64'):
+        return True
+    else:
+        return False
+
 class Root:
     @cherrypy.expose
-    def index(self, table = 'weather', X = 'temp_f_avg', Y = None):
+    def index(self, table = 'weather', X = None, Y = None, search = None):
         with PostgreSQL(table = table, database = 'pittsburgh') as psql:
             df = get_df(psql, table)
 
-        if Y is None:
+        with PostgreSQL(database = 'pittsburgh') as psql:
+            query = "select DISTINCT table_name from information_schema.columns"
+            if search is not None:
+                query += " where table_name like '%{}%'".format(search)
+
+            psql.execute(query)
+            tables = [table[0] for table in psql.cur.fetchall()]
+
+        if X is None and Y is None:
+            html = ''
+            title = ''
+            
+        elif Y is None or X is None:
+            if X is None:
+                X = Y
             title = X
             plot = figure(title=X, background_fill_color="#E8DDCB")
 
@@ -40,15 +61,19 @@ class Root:
 
             plot.quad(top=hist, bottom=0, left=edges[:-1], right=edges[1:],
                     fill_color="#036564", line_color="#033649")
+            html = file_html(plot, CDN, "my plot")
         else:
             title = "{} by {}".format(X, Y)
             plot = figure()
             plot.cross(df[X], df[Y])
+            html = file_html(plot, CDN, "my plot")
             
 
-        html = file_html(plot, CDN, "my plot")
-
         env = Environment(loader=FileSystemLoader('templates'))
+        cols = tuple(df.columns)
+        dtypes = tuple(df.dtypes)
+        numeric = [col for col, dtype in zip(cols, dtypes) if isNumeric(dtype)]
+        categorical = [col for col, dtype in zip(cols, dtypes) if not isNumeric(dtype)]
 
         tmpl = env.get_template('index.html')
         print(tmpl)
@@ -56,23 +81,25 @@ class Root:
                            target     = title, 
                            title      = "Pittsburgh",
                            plot       = html,
-                           X    = tuple(df.columns),
-                           Y    = tuple(df.columns),
+                           X    = numeric,
+                           Y    = numeric,
+                           groupby = categorical,
+                           tables = tables,
         )
 
 
     @cherrypy.expose
     def map(self, webmap = '7694ded02a524c97ae145fa3648081a9'):
-        plot = ''.format(webmap)
+        webmap = ''.format(webmap)
         
         env = Environment(loader=FileSystemLoader('templates'))
 
-        tmpl = env.get_template('index.html')
+        tmpl = env.get_template('map.html')
         print(tmpl)
         return tmpl.render(salutation='Pittsburgh: ',
                            target='Median Age Map',
                            title = "Median Age",
-                           plot = html,
+                           webmap = webmap,
                            sidebar = None,
         )
     
