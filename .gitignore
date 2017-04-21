@@ -6,6 +6,9 @@ dotfiles
 anaconda3
 .*
 bin/
+credentials.config
+*.bak
+*zach*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
