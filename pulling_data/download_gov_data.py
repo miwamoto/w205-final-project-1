@@ -155,10 +155,12 @@ def get_dtype(dtype):
 
 def insert_to_db(df, fname):
     dtypes  = [get_dtype(dtype) for dtype in df.dtypes]
-    columns = [re.sub(' ', '_', col) for col in df.columns]
+    columns = [re.sub('[^a-zA-z0-9]', '_', col) for col in df.columns]
+    nums = [str(n) for n in range(10)]
+    columns = ["_" + col if col[0] in nums else col for col in columns]
     filename, file_extension = os.path.splitext(fname)
 
-    df.fillna('NULL')
+    df = df.fillna('NULL')
     with PostgreSQL(database = 'pittsburgh') as pg:
         pg.create_table(filename, cols = columns, types = dtypes)
         pg.add_rows(tuple(df.itertuples(index = False)))
@@ -221,9 +223,11 @@ def fetch_files_by_type(flat_results, data_formats = ("CSV", "KML"), basedir = '
         # or if no types specified
         good_format = data_formats is None or f_format in data_formats
         fname = '{}_{}.{}'.format(name, num, ext)
+        fname, fext = os.path.splitext(fname)
 
         #Underscores only permissible non-alphanumeric
         fname = re.sub('[^a-zA-Z0-9]', '_', fname)
+        fname = fname + fext
 
 
         if good_format and needs_updating(result):
@@ -242,7 +246,7 @@ def main():
         os.mkdir(BASEDIR)
     except:
         pass
-    fetch_files_by_type(flat, download_formats, basedir = BASEDIR)
+    fetch_files_by_type(flat[42:], download_formats, basedir = BASEDIR)
 
 
 if __name__ == '__main__':
