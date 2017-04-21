@@ -4,16 +4,22 @@ from postgres.PostgreSQL import PostgreSQL
 
 from bokeh.resources import CDN
 from bokeh.embed import file_html
-from bokeh.models import Range1d
-from bokeh.layouts import gridplot
-from bokeh.plotting import figure, show, output_file
+from bokeh.plotting import figure
 
 import numpy as np
 import pandas as pd
 
-import os, os.path
-import random
-import string
+def fetch_tables(search = None, limit = 10):
+    with PostgreSQL(database = 'pittsburgh') as psql:
+        query = "select DISTINCT table_name from information_schema.columns"
+        if search is not None:
+            query += " where table_name like '%{}%'".format(search)
+        if limit is not None:
+            query += " limit {}".format(limit)
+
+        psql.execute(query)
+        return [table[0] for table in psql.cur.fetchall()]
+
 
 
 def get_df(psql, table):
@@ -35,17 +41,11 @@ def isNumeric(dtype):
 
 class Root:
     @cherrypy.expose
-    def index(self, table = 'weather', X = None, Y = None, search = None):
+    def index(self, table = 'weather', X = None, Y = None, search = None, limit = 10):
         with PostgreSQL(table = table, database = 'pittsburgh') as psql:
             df = get_df(psql, table)
 
-        with PostgreSQL(database = 'pittsburgh') as psql:
-            query = "select DISTINCT table_name from information_schema.columns"
-            if search is not None:
-                query += " where table_name like '%{}%'".format(search)
-
-            psql.execute(query)
-            tables = [table[0] for table in psql.cur.fetchall()]
+            tables = fetch_tables(search = search, limit = limit)
 
         if X is None and Y is None:
             html = ''
