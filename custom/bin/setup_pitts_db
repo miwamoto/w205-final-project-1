@@ -18,4 +18,4 @@ sudo -u postgres echo "standard_conforming_strings = off" >> /data/pittsburgh_db
 /home/ec2-user/bin/start_postgres
 
 # #create pittsburgh database
-/home/ec2-user/anaconda3/bin/python /home/ec2-user/bin/setup_database
+/home/ec2-user/anaconda3/bin/python /home/ec2-user/custom/bin/setup_database

@@ -7,6 +7,7 @@ Please run this on every new AMI version
 ```bash
 git config --global user.name "Your Name"
 git config --global user.email "your_email@xyz.com"
+git pull
 ```
 
 ### Mounting volume
