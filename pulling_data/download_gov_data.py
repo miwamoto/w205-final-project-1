@@ -160,15 +160,29 @@ def insert_to_db(metadata, df, fname):
     columns = ["_" + col if col[0] in nums else col for col in columns]
     filename, file_extension = os.path.splitext(fname)
 
+    with PostgreSQL(database = 'pittsburgh') as psql:
+
+    for table in tables:
+        with PostgreSQL(table = table, database = 'pittsburgh') as psql:
+    		query = "select column_name from information_schema.columns  where table_name = '{}'".format(table)
+    		psql.execute(query)
+    		columnsOld = [col[0] for col in psql.cur.fetchall()]
+        	if columnsOld == columns:
+                table_name = table
+    			break
+        	else:
+                table_name = filename
+
+	#make new table and add rows
     try:
-        print(metadata.name)
         df = df.fillna('NULL')
         with PostgreSQL(database = 'pittsburgh') as pg:
-            pg.create_table(filename, cols = columns, types = dtypes)
+            pg.create_table(table_name, cols = columns, types = dtypes)
             pg.add_rows(tuple(df.itertuples(index = False)))
     except MemoryError as e:
         print(e)
         print('{} too big!!!!'.format(fname))
+
 
 
 def update_file_in_db(metadata, basedir, fname):
