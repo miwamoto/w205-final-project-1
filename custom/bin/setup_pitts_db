@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 #set up directories for postgres
 mkdir /data/pittsburgh_db
