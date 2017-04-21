@@ -15,7 +15,7 @@ sudo -u postgres echo "listen_addresses = '*'" >> /data/pittsburgh_db/data/postg
 sudo -u postgres echo "standard_conforming_strings = off" >> /data/pittsburgh_db/data/postgresql.conf
 
 # #start postgres
-/home/ec2-user/bin/start_postgres
+/home/ec2-user/custom/bin/start_postgres
 
 # #create pittsburgh database
 /home/ec2-user/anaconda3/bin/python /home/ec2-user/custom/bin/setup_database
