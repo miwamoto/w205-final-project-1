@@ -19,7 +19,7 @@ to mount the drive (assuming it's in the default location of /dev/xvdf).
 If you are using a new volume, run the following to format the drive at the given location and then mount it:
 ```
 sudo su
-sh $HOME/custom/bin/wipe_drive /dev/xvdf
+sh /home/ec2-user/custom/bin/wipe_drive /dev/xvdf
 exit
 ```
 
@@ -28,7 +28,7 @@ exit
 In order to set up the database, run:
 ```
 sudo su
-setup_pitts_db
+/home/ec2-user/custom/bin/setup_pitts_db
 exit
 ```
 
