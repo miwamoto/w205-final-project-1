@@ -16,10 +16,11 @@ startup
 ```
 to mount the drive (assuming it's in the default location of /dev/xvdf).
 
-If you are using a new volume, run the following to format the drive at the given location:
+If you are using a new volume, run the following to format the drive at the given location and then mount it:
 ```
-wipe_drive /dev/xvdf
-startup
+sudo su
+sh $HOME/custom/bin/wipe_drive /dev/xvdf
+exit
 ```
 
 ### Postgres
