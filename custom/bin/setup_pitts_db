@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #set up directories for postgres
-sudo rm -r /data/pittsburgh_db
+sudo mv /data/pittsburgh_db /data/pittsburgh_db_bak
 mkdir /data/pittsburgh_db
 mkdir /data/pittsburgh_db/data
 mkdir /data/pittsburgh_db/logs
