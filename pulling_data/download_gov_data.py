@@ -184,7 +184,11 @@ def update_file_in_db(basedir, fname):
     filename, file_extension = os.path.splitext(fname)
 
     if file_extension.lower() == '.csv':
-        df = pd.read_csv(os.path.join(basedir, fname))
+        try:
+            df = pd.read_csv(os.path.join(basedir, fname))
+        except:
+            print("Couldn't parse csv: {}".format(fname))
+            return
         insert_to_db(df, fname)
 
 

@@ -37,6 +37,7 @@
      var url = window.location.origin
      var params = get_search_params()
      params[key] = val;
+    delete params[''];
      window.location = url + "?" + $.param(params);
  }
 </script>
