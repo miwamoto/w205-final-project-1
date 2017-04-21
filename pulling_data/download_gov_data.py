@@ -160,10 +160,14 @@ def insert_to_db(df, fname):
     columns = ["_" + col if col[0] in nums else col for col in columns]
     filename, file_extension = os.path.splitext(fname)
 
-    df = df.fillna('NULL')
-    with PostgreSQL(database = 'pittsburgh') as pg:
-        pg.create_table(filename, cols = columns, types = dtypes)
-        pg.add_rows(tuple(df.itertuples(index = False)))
+    try:
+        df = df.fillna('NULL')
+        with PostgreSQL(database = 'pittsburgh') as pg:
+            pg.create_table(filename, cols = columns, types = dtypes)
+            pg.add_rows(tuple(df.itertuples(index = False)))
+    except MemoryError as e:
+        print(e)
+        print('{} too big!!!!'.format(fname))
 
 
 def update_file_in_db(basedir, fname):
@@ -246,7 +250,7 @@ def main():
         os.mkdir(BASEDIR)
     except:
         pass
-    fetch_files_by_type(flat, download_formats, basedir = BASEDIR)
+    fetch_files_by_type(flat[91:], download_formats, basedir = BASEDIR)
 
 
 if __name__ == '__main__':
