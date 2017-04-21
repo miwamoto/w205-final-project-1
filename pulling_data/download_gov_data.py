@@ -131,7 +131,7 @@ def write_text(url, fpath):
             print('failed. moving on')
 
 
-def fetch_file_by_url(url, basedir = "/tmp/pittsburgh", fname = None):
+def fetch_file_by_url(metadata, url, basedir = "/tmp/pittsburgh", fname = None):
     """Save file from url in designated location"""
     if fname is None:
         fname = os.path.basename(url)
@@ -153,7 +153,7 @@ def get_dtype(dtype):
     return dtype
 
 
-def insert_to_db(df, fname):
+def insert_to_db(metadata, df, fname):
     dtypes  = [get_dtype(dtype) for dtype in df.dtypes]
     columns = [re.sub('[^a-zA-z0-9]', '_', col) for col in df.columns]
     nums = [str(n) for n in range(10)]
@@ -170,7 +170,7 @@ def insert_to_db(df, fname):
         print('{} too big!!!!'.format(fname))
 
 
-def update_file_in_db(basedir, fname):
+def update_file_in_db(metadata, basedir, fname):
     """Use new file to update database"""
 
     #TODO actually update DB
@@ -189,7 +189,7 @@ def update_file_in_db(basedir, fname):
         except:
             print("Couldn't parse csv: {}".format(fname))
             return
-        insert_to_db(df, fname)
+        insert_to_db(metadata, df, fname)
 
 
 def update_metadata_db(result):
@@ -239,8 +239,8 @@ def fetch_files_by_type(flat_results, data_formats = ("CSV", "KML"), basedir = '
 
 
         if good_format and needs_updating(result):
-            fetch_file_by_url(url, basedir = subdir, fname = fname)
-            update_file_in_db(subdir, fname)
+            fetch_file_by_url(result, url, basedir = subdir, fname = fname)
+            update_file_in_db(result, subdir, fname)
             # update_metadata_db(result)
         else:
             print("skipping {}".format(fname))
