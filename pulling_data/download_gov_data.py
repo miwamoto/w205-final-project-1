@@ -161,19 +161,22 @@ def insert_to_db(metadata, df, fname):
     filename, file_extension = os.path.splitext(fname)
 
     with PostgreSQL(database = 'pittsburgh') as psql:
+        query = "select DISTINCT table_name from information_schema.columns where table_name like '{}%'".format(metadata.name)
+        psql.execute(query)
+        tables = [table[0] for table in psql.cur.fetchall()]
 
+    table_name = filename
     for table in tables:
         with PostgreSQL(table = table, database = 'pittsburgh') as psql:
-    		query = "select column_name from information_schema.columns  where table_name = '{}'".format(table)
-    		psql.execute(query)
-    		columnsOld = [col[0] for col in psql.cur.fetchall()]
-        	if columnsOld == columns:
-                table_name = table
-    			break
-        	else:
-                table_name = filename
+            query = "select column_name from information_schema.columns where table_name = '{}'".format(table)
+            psql.execute(query)
+            columnsOld = [col[0] for col in psql.cur.fetchall()]
 
-	#make new table and add rows
+        if columnsOld == columns:
+            table_name = table
+            break
+
+    #make new table and add rows
     try:
         df = df.fillna('NULL')
         with PostgreSQL(database = 'pittsburgh') as pg:
