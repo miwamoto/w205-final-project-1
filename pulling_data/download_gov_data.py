@@ -78,7 +78,7 @@ def flatten_extracted_data(extracted):
     for result in extracted:
         for i, resource in enumerate(result['resources']):
             row = FetchableData(
-                name = result['name'],
+                name = re.sub('[^a-zA-Z0-9]', '_', result['name']),
                 metadata_modified = result['metadata_modified'],
                 file_format = resource['format'],
                 url = resource['url'],
@@ -161,6 +161,7 @@ def insert_to_db(metadata, df, fname):
     filename, file_extension = os.path.splitext(fname)
 
     try:
+        print(metadata.name)
         df = df.fillna('NULL')
         with PostgreSQL(database = 'pittsburgh') as pg:
             pg.create_table(filename, cols = columns, types = dtypes)
