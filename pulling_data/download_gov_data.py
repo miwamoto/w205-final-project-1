@@ -250,7 +250,7 @@ def main():
         os.mkdir(BASEDIR)
     except:
         pass
-    fetch_files_by_type(flat[91:], download_formats, basedir = BASEDIR)
+    fetch_files_by_type(flat, download_formats, basedir = BASEDIR)
 
 
 if __name__ == '__main__':
