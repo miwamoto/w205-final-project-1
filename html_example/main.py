@@ -66,7 +66,7 @@ def isNumeric(dtype):
 
 class Root:
     @cherrypy.expose
-    def index(self, table = 'weather', X = None, Y = None, search = None, limit = 10, size = 1, table_limit = 10):
+    def index(self, table = 'weather', X = None, Y = None, search = None, limit = 10, size = 1, table_limit = 5000):
         env = Environment(loader=FileSystemLoader('templates'))
         tmpl = env.get_template('index.html')
         tables = fetch_tables(search, table_limit)
