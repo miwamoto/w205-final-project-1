@@ -1,4 +1,5 @@
-import urllib
+import requests
+import json
 from postgres.PostgreSQL import PostgreSQL
 
 # Short-form column headers of demographic information
@@ -10,8 +11,8 @@ TYPES =['VARCHAR', 'INT', 'INT', 'INT', 'INT', 'FLOAT']
 def fetch_poverty_data():
     # Parameters for the Western Pennsylvania Regional Data Center API
     URL = 'https://data.wprdc.org/api/action/datastore_search?resource_id=86fab672-1c6b-48c3-a637-e5827c66ee5c'
-    response = urllib.urlopen(URL)
-    data = json.loads(response.read())
+    response = requests.get(URL)
+    data = json.loads(response.text)
     records = data['result']['records']
 
     # Actual column names
@@ -34,20 +35,20 @@ def fetch_poverty_data():
 def main():
     # Create poverty table
     with PostgreSQL(database = 'pittsburgh') as psql:
-        cols = HEADERS
-        types = TYPES
-        psql.create_table(table = 'poverty', cols = cols, types = types)
+        cols = HEADERS
+        types = TYPES
+        psql.create_table(table = 'poverty', cols = cols, types = types)
 
     # fetch data and populate the poverty table
     rows = fetch_poverty_data()
     with PostgreSQL(table = 'poverty', database = 'pittsburgh') as psql:
         psql.add_rows(rows, types = types, cols = cols)
 
-    print('Success!')
-    print('')
-    print('Try running:')
-    print('psql -U postgres pittsburgh')
-    print('select * from poverty limit 5;')
+    print('Success!')
+    print('')
+    print('Try running:')
+    print('psql -U postgres pittsburgh')
+    print('select * from poverty limit 5;')
 
 if __name__ == '__main__':
-    main()
+    main()
