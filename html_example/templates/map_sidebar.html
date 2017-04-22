@@ -37,14 +37,14 @@
 <script type="text/javascript">
  $('.tables.link').click(function (event) {
      event.preventDefault();
-     append_to_url([['table', $(this).attr('value') ], ['X', ''], ['Y', '']]); return false;
+     append_to_url('table', $(this).attr('value') ); return false;
 });
  $('.X.link').click(function (event) {
      event.preventDefault();
-     append_to_url([['X', $(this).attr('value') ]]); return false;
+     append_to_url('X', $(this).attr('value') ); return false;
 });
  $('.Y.link').click(function (event) {
      event.preventDefault();
-     append_to_url([['Y', $(this).attr('value') ]]); return false;
+     append_to_url('Y', $(this).attr('value') ); return false;
 });
 </script>

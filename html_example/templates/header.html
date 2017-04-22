@@ -36,17 +36,25 @@
 	 return params;
      } 
 
-     function append_to_url(key, val) {
-	 var url = window.location.origin
-	 var params = get_search_params()
-	 params[key] = val;
+     function append_to_url(keyvals) {
+	 var url = window.location.origin;
+	 var params = get_search_params();
+	 for(var i = 0; i < keyvals.length; i++) {
+	     var key = keyvals[i][0];
+	     var val = keyvals[i][1];
+	     if (val == '') {
+		 delete params[key];
+	     } else {
+		 params[key] = val;
+	     }
+	 }
 	 delete params[''];
 	 window.location = url + "?" + $.param(params);
      }
 
      function searchbox() {
 	 var searchval = $('#searchbox').val();
-         append_to_url('search', searchval);
+         append_to_url([['search', searchval]]);
 	 return false;
      }
 
