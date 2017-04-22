@@ -6,7 +6,7 @@ from postgres.PostgreSQL import PostgreSQL
 HEADERS =['Neighborhood', 'Sector', 'Population', 'Num_Poverty', 'Percent_Poverty']
 
 # Define types of each column
-TYPES =['VARCHAR', 'INT', 'INT', 'INT', 'INT', 'FLOAT']
+TYPES =['VARCHAR', 'INT', 'INT', 'INT', 'FLOAT']
 
 def fetch_poverty_data():
     # Parameters for the Western Pennsylvania Regional Data Center API
