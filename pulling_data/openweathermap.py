@@ -1,5 +1,5 @@
 from datetime import datetime, tzinfo, timedelta
-import urllib, json
+import requests, json
 import pandas as pd
 from postgres.PostgreSQL import PostgreSQL
 
@@ -43,8 +43,8 @@ def fetch_weather_forecasts():
     API_key = "a3e2ad7d3611478118790885a2e004ac"
     URL = " http://api.openweathermap.org/data/2.5/forecast?id=" + cityID + "&APPID=" + API_key
     # fetch the data
-    response = urllib.urlopen(URL)
-    data = json.loads(response.read())
+    response = requests.get(URL)
+    data = json.loads(response.text)
 #    data = testJSON
     wild_weather_codes = ['Thunderstorm','Rain','Snow','Extreme']
     forecasts = []
@@ -68,20 +68,20 @@ def fetch_weather_forecasts():
     return forecasts
 
 def main():
-    with PostgreSQL(database = 'pittsburgh') as psql:
-        cols = HEADERS
-        types = TYPES
-        psql.create_table(table = 'weather_forecasts', cols = cols, types = types)
+    with PostgreSQL(database = 'pittsburgh') as psql:
+        cols = HEADERS
+        types = TYPES
+        psql.create_table(table = 'weather_forecasts', cols = cols, types = types)
 
     rows = fetch_weather_forecasts()
     with PostgreSQL(table = 'weather_forecasts', database = 'pittsburgh') as psql:
         psql.add_rows(rows, types = types, cols = cols)
 
-    print('Success!')
-    print('')
-    print('Try running:')
-    print('psql -U postgres pittsburgh')
-    print('select * from weather_forecasts limit 5;')
+    print('Success!')
+    print('')
+    print('Try running:')
+    print('psql -U postgres pittsburgh')
+    print('select * from weather_forecasts limit 5;')
 
 if __name__ == '__main__':
-    main()
+    main()
