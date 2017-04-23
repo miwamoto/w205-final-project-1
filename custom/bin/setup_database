@@ -12,13 +12,14 @@ def main():
     parser.read('/home/ec2-user/credentials.config')
 
     try:
-        database  = parser.get('POSTGRES' , 'database')
-        user      = parser.get('POSTGRES' , 'user')
-        password  = parser.get('POSTGRES' , 'password')
-        host      = parser.get('POSTGRES' , 'host')
-        port      = parser.get('POSTGRES' , 'port')
-        pittsburgh_db = parser.get('PITTSBURGH'   , 'database')
-        # table     = parser.get('PITTSBURGH'   , 'table')
+        database       = parser.get('POSTGRES'   , 'database')
+        user           = parser.get('POSTGRES'   , 'user')
+        password       = parser.get('POSTGRES'   , 'password')
+        host           = parser.get('POSTGRES'   , 'host')
+        port           = parser.get('POSTGRES'   , 'port')
+        pittsburgh_db  = parser.get('PITTSBURGH' , 'database')
+        clean_database = parser.get('PITTSBURGH' , 'clean_database')
+        # table        = parser.get('PITTSBURGH' , 'table')
 
     except configparser.NoSectionError as e:
         print("##############################")
@@ -50,7 +51,19 @@ def main():
         # Well, something might. If it does...
         print("Could not create {}".format(pittsburgh_db))
 
-    # Connect to our new database
+    try:
+        # Do the same for the 'clean' database
+        # CREATE DATABASE can't run inside a transaction
+        conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        cur = conn.cursor()
+        cur.execute("CREATE DATABASE {}".format(pittsburgh_clean_db))
+        cur.close()
+        conn.close()
+    except:
+        # Well, something might. If it does...
+        print("Could not create {}".format(pittsburgh_clean_db))
+
+    Connect to our new database
     conn = pg.connect(database = pittsburgh_db,
                       user     = user,
                       password = password,
@@ -60,14 +73,22 @@ def main():
 
     cur = conn.cursor()
 
-    # # And create our table
-    # try:
-    #     cur.execute('''CREATE TABLE {}
-    #         (word TEXT PRIMARY KEY     NOT NULL,
-    #         count INT     NOT NULL);'''.format(table))
-    #     conn.commit()
-    # finally: # ~~FIN~~ #
-    #     conn.close()
+    # And create our table
+    try:
+        cur.execute('''CREATE TABLE metatable
+            (
+            file_id           TEXT PRIMARY KEY NOT NULL,
+            revision_id       TEXT             NOT NULL,
+            name              TEXT             NOT NULL,
+            metadata_modified TEXT             NOT NULL,
+            file_format       TEXT             NOT NULL,
+            url               TEXT             NOT NULL,
+            package_id        TEXT             NOT NULL,
+            resource_num      TEXT             NOT NULL,
+            );'''.format(table))
+        conn.commit()
+    finally: # ~~FIN~~ #
+        conn.close()
     
 
 if __name__ == '__main__':
