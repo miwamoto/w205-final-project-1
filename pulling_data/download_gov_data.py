@@ -31,6 +31,20 @@ BASEDIR = '/data/pb_files'
 # Formats to download
 download_formats = ('CSV',)
 
+# Unnecessary and large
+blacklist = None
+whitelist = None
+
+police_files = (
+'police_incident_blotter_archive',
+'pittsburgh_police_arrest_data',
+'police_incident_blotter_30_day',
+'pittsburgh_police_zones_4763f',
+'police_community_outreach',
+'police_civil_actions',
+'pittsburgh_police_sectors_5f5e5',
+)
+
 # Special tuple type to store rows of our metadata
 FetchableData = namedtuple("data", [
     'name', 'metadata_modified', 'file_format', 'url', 'file_id',
@@ -187,6 +201,19 @@ def insert_to_db(metadata, df, fname):
         print('{} too big!!!!'.format(fname))
 
 
+def clean_df(df):
+    print('cleaning')
+    for i, x in enumerate(df.dtypes):
+        if str(x) == 'object':
+            col = df.columns[i]
+            try:
+                df[col + '_num'] = df[col].apply(lambda x: float(re.sub('[^0-9]', '', x)))
+                print(df[col + '_num'].dtype)
+            except Exception as e:
+                pass
+                
+    return df
+
 
 def update_file_in_db(metadata, basedir, fname):
     """Use new file to update database"""
@@ -207,6 +234,10 @@ def update_file_in_db(metadata, basedir, fname):
         except:
             print("Couldn't parse csv: {}".format(fname))
             return
+        try:
+            df = clean_df(df)
+        except:
+            pass
         insert_to_db(metadata, df, fname)
 
 
@@ -272,6 +303,14 @@ def main():
         os.mkdir(BASEDIR)
     except:
         pass
+
+    whitelist = police_files
+    
+    if whitelist is not None:
+        flat = [d for d in flat if d.name in whitelist]
+    elif blacklist is not None:
+        flat = [d for d in flat if d.name not in blacklist]
+
     fetch_files_by_type(flat, download_formats, basedir = BASEDIR)
 
 
