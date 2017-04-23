@@ -105,13 +105,35 @@ def flatten_extracted_data(extracted):
     return output
 
 
-def needs_updating(flat_row):
-    """Query the database to see if we should download new data"""
+def metacompare(metadata):
+    #Query the database to see if we should download new data
+    with PostgreSQL(database = 'pittsburgh') as psql:
+        # Find the file id, retrieve its revision id
+        query = "select revision_id, metadata_modified from metatable where file_id = '{}' limit 1".format(metadata.file_id)
+        psql.execute(query)
+        try:
+        # Only one result returned, so take the 0th item
+            currentfile_revision = psql.cur.fetchall()[0]
+            currentfile_modified = psql.cur.fetchall()[1]
+        except:
+            return True
+    # If current revision_id and metadata_modified doesn't match the one in table 
+    # mark file for download
+    if metadata.revision_id != currentfile_revision:
+        if metadata.metadata_modified != currentfile_modified:
+            return True
+        else:
+            return False
+    else:
+        return False
 
-    # TODO: Hook up to database
-    # Probably want to use id and and metadata_modified to check
-    # database? Or maybe revision_id?
-    return True
+def update_metadata_db(metadata):
+    """Updates last fetched time in metadata DB"""
+    with PostgreSQL(database = 'pittsburgh') as psql:
+        query = "INSERT INTO metatable set file_id = '{}', revision_id = '{}', name = '{}', metadata_modified = '{}', file_format = '{}', url '{}', package_id = '{}', resource_num = '{}'".format(metadata.file_id, metadata.revision_id, metadata.name, metadata.metadata_modified, metadata.file_format, metadata.url, metadata.package_id,metadata.resource_num)
+        psql.execute(query)
+        query = "UPDATE metatable where file_id = '{}' set revision_id = '{}', metadata_modified = '{}', url '{}'".format(metadata.file_id, metadata.revision_id,metadata.metadata_modified,metadata.url)
+        psql.execute(query)
 
 
 def write_binary(url, fpath):
@@ -239,14 +261,6 @@ def update_file_in_db(metadata, basedir, fname):
         except:
             pass
         insert_to_db(metadata, df, fname)
-
-
-def update_metadata_db(result):
-    """Updates last fetched time in metadata DB"""
-
-    # TODO Mark The file as newly update so we don't have to fetch it
-    # again until it's update on the site
-    pass
     
 
 def fetch_files_by_type(flat_results, data_formats = ("CSV", "KML"), basedir = '/data/pb_files'):
@@ -287,7 +301,7 @@ def fetch_files_by_type(flat_results, data_formats = ("CSV", "KML"), basedir = '
         fname = fname + fext
 
 
-        if good_format and needs_updating(result):
+        if good_format and metacompare(result):
             fetch_file_by_url(result, url, basedir = subdir, fname = fname)
             update_file_in_db(result, subdir, fname)
             # update_metadata_db(result)
