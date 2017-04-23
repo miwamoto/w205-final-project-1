@@ -1,3 +1,4 @@
+
 import requests
 import re
 from postgres.PostgreSQL import PostgreSQL
@@ -32,19 +33,234 @@ BASEDIR = '/data/pb_files'
 # Formats to download
 download_formats = ('CSV',)
 
-# Unnecessary and large
-blacklist = None
 whitelist = None
 
-police_files = (
-'police_incident_blotter_archive',
-'pittsburgh_police_arrest_data',
-'police_incident_blotter_30_day',
-'pittsburgh_police_zones_4763f',
-'police_community_outreach',
-'police_civil_actions',
-'pittsburgh_police_sectors_5f5e5',
-)
+# Unnecessary and large
+blacklist = {
+    # Possibly useful, but MASSIVE
+    #######################################
+    'allegheny_county_jail_daily_census', #
+    #######################################
+
+    'allegheny_county_soil_type_areas',
+    'pittsburgh_steps_map',
+    'allegheny_county_cell_tower_points',
+    'allegheny_county_restaurant_food_facility_inspection_violations',
+    'allegheny_county_block_areas',
+    'allegheny_county_dam_locations',
+    'allegheny_county_supermarkets_convenience_stores',
+    'pittsburgh_individual_historic_properties_6bd95',
+    'port_authority_of_allegheny_county_park_and_rides',
+    '311_data_in_development',
+    'allegheny_county_park_rangers_outreach',
+    'pittsburgh_bridges_18da5',
+    'washington_county_crash_data',
+    'allegheny_county_clean_indoor_air_act_exemptions',
+    'allegheny_county_tobacco_vendors',
+    'public_works_block_party_summary',
+    'allegheny_county_address_points',
+    'allegheny_county_plumbers',
+    'allegheny_county_street_centerlines',
+    'new_zoning_and_parcel_map_viewer',
+    'pittsburgh_city_facilities_ba1f1',
+    'signalized_intersections',
+    'healthy_ride_trip_data',
+    'allegheny_county_owned_roads_centerlines',
+    'allegheny_county_municipal_building_energy_and_water_use',
+    'allegheny_county_wic_vendor_locations',
+    'allegheny_county_department_of_public_works_maintenance_district_boundaries',
+    'allegheny_county_beltway_system_street_centerlines',
+    'pghodsteps_b3a41',
+    'allegheny_county_toxics_release_inventory',
+    'allegheny_county_fire_districts',
+    'allegheny_county_property_sale_transactions',
+    'beaver_county_crash_data',
+    'allegheny_county_property_viewer',
+    'allegheny_county_building_footprint_locations_88dbb',
+    'pittsburgh_traffic_signals_bbc6c',
+    'allegheny_county_commercial_vehicle_inspections',
+    'interactive_zoning_and_parcel_map',
+    'water_features_3639f',
+    'on_road_bicycle_pavement_markings',
+    'westmoreland_county_crash_data',
+    'allegheny_county_particulate_matter_2_5',
+    'allegheny_county_traffic_counts',
+    'allegheny_county_pennsylvania_senate_district_boundaries',
+    'pghodfirezones',
+    'pittsburgh_greenways_176b9',
+    'permitted_shelters',
+    'allegheny_county_watershed_boundaries',
+    'pittsburgh_city_council_districts_5d3ed',
+    'allegheny_county_voting_district_boundaries_fall_2016_present',
+    'operations_green_spaces',
+    'allegheny_county_polling_place_locations_november_2015',
+    'allegheny_county_hydrology_areas',
+    'snow_plow_activity_2015_2016',
+    'capital_projects',
+    'pittsburgh_ems_districts_58874',
+    'allegheny_county_tif_boundaries_3b4b9',
+    'allegheny_county_asbestos_permits',
+    'pittsburgh_undermined_areas_191a3',
+    'pittsburgh_fema_flood_zones_78814',
+    'pittsburgh_fish_fry_locations',
+    '2014_capital_project_budgets',
+    'allegheny_county_election_results',
+    'baldwin_borough_monthly_revenue_and_expenses',
+    'allegheny_county_food_facilities',
+    'allegheny_county_polling_place_locations_november_2014',
+    'allegheny_county_dog_licenses',
+    'pittsburgh_wards_map',
+    'allegheny_county_council_districts',
+    'street_sweeping_routes_5ac4c',
+    'allegheny_county_parcel_boundaries',
+    'allegheny_county_owned_bridges_points',
+    'pittsburgh_city_boundary_cbe8f',
+    'pittsburgh_2014_cdbg_block_groups_acc69',
+    'lobbyist_activity',
+    'field_listings',
+    'allegheny_county_major_rivers',
+    'pittsburgh_landslide_prone_3c79c',
+    'pittsburgh_uptown_ipod_zoning_district_34233',
+    'allegheny_county_wooded_area_boundaries',
+    'port_authority_of_allegheny_county_transit_stops',
+    'allegheny_county_tif_exclusions_9adaf',
+    'make_my_trip_count_2015',
+    'allegheny_county_cemetery_outlines',
+    'allegheny_county_sheriff_sales',
+    'port_authority_of_allegheny_county_transit_routes',
+    'aced_federal_grant_contractor_tracking',
+    'pittsburgh_index_map',
+    'pittsburgh_ura_main_st_c626d',
+    'play_area_listings',
+    'whos_your_neighborhood_planner_map',
+    'allegheny_county_voting_district_2016_web_map',
+    'municipal_building_energy_usage',
+    'allegheny_county_pennsylvania_u_s_legislative_congressional_district_boundaries',
+    'allegheny_county_greenways',
+    'allegheny_county_basin_outlines_map',
+    'pittsburgh_historic_districts_5d240',
+    'allegheny_county_map_index_grid',
+    'allegheny_county_voting_district_2015_web_map',
+    'pittsburgh_dpw_environmental_services_divisions_f4682',
+    'pittsburgh_beautify_the_burgh_a4e12',
+    '2010_census_blocks_with_geographic_codes_southwestern_pa',
+    'allegheny_county_housing_and_community_environment_inspections',
+    'healthy_ride_stations',
+    'allegheny_county_land_use_areas',
+    'allegheny_county_illegal_dump_sites',
+    'allegheny_county_environmental_justice_areas',
+    'allegheny_county_owned_bridges_centerlines',
+    'butler_county_crash_data',
+    'allegheny_county_crash_data',
+    'allegheny_county_kane_regional_center_census',
+    'allegheny_county_hydrology_lines',
+    'summer_meal_sites',
+    'allegheny_county_snow_route_centerlines_2016_2017',
+    'regional_park_n_ride_facilities_web_inventory_click_download_to_view',
+    'city_facilities_centroids',
+    'pittsburgh_dpw_divisions_54e37',
+    'allegheny_county_municipal_land_use_ordinances',
+    'pittsburgh_2014_cdbg_census_tracts_09e99',
+    'allegheny_county_polling_place_locations_november_2016',
+    'pittsburgh_city_council_district_map',
+    'allegheny_county_public_swimming_pool_hot_tub_and_spa_inspections',
+    'green_infrastructure_siting_and_cost_effectiveness_analysis',
+    'allegheny_county_school_district_boundaries',
+    'aced_allegheny_home_improvement_loan_program_ahilp',
+    'allegheny_county_air_quality',
+    'allegheny_county_blazed_trails_locations',
+}
+
+maps = {
+    'movepgh_project_map',
+    'geocoders',
+    'pittsburgh_map',
+    'pittsburgh_neighborhoods_map',
+    'pittsburgh_neighborhoods_64095',
+}
+
+boundaries = {
+    'allegheny_county_municipal_boundaries',
+    'allegheny_county_zip_code_boundaries',
+    'allegheny_county_boundary',
+}
+
+police_dsets = {
+    'officer_training',
+    'police_incident_blotter_archive',
+    'pittsburgh_police_arrest_data',
+    'police_incident_blotter_30_day',
+    'pittsburgh_police_zones_4763f',
+    'police_community_outreach',
+    'police_civil_actions',
+    'pittsburgh_police_sectors_5f5e5',
+    'pittsburgh_police_zones_4763f',
+    'non_traffic_citations',
+}
+
+health_dsets = {
+    'state_of_aging_in_allegheny_county_survey',
+    'allegheny_county_primary_care_access',
+    'allegheny_county_smoking_rates',
+    'hyperlipidemia',
+    'diabetes',
+    'allegheny_county_obesity_rates',
+    'hypertension',
+    'allegheny_county_diabetes_hospitalization',
+    'allegheny_county_median_age_at_death',
+    'allegheny_county_anxiety_medication',
+    'allegheny_county_depression_medication',
+    'allegheny_county_fatal_accidental_overdoses',
+    'allegheny_county_hospitals',
+    'allegheny_county_hypertension_hospitalization',
+}
+
+poverty_dsets = {
+    'allegheny_county_poor_housing_conditions',
+    'neighborhoods_with_snap_data_3d3a9',
+    'pgh_snap',
+}
+
+other_dsets = {
+    'allegheny_county_fast_food_establishments',
+}
+
+cycling_dsets = {
+    'current_bike_availability_by_station',
+    'autonomous_vehicle_survey_of_bicyclists_and_pedestrians_in_pittsburgh_2017',
+    'bike_rack_locations_downtown_pittsburgh',
+    }
+
+public_building_dsets = {
+    'allegheny_county_magisterial_districts_outlines_2015',
+    'pittsburgh_pli_violations_report',
+    'allegheny_county_older_housing',
+    'allegheny_county_public_building_locations',
+    'allegheny_county_vacant_properties',
+    'city_owned_publicly_available_properties',
+    'library_locations',
+    'allegheny_county_housing_tenure',
+    'pittsburgh_zoning_districts_7200c',
+    'envision_downtown_public_space_public_life_survey',
+    }
+
+green_dsets = {
+    'allegheny_county_land_cover_areas',
+    'allegheny_county_parks_data_web_map',
+    'allegheny_county_parks_outlines_9416b',
+    'comprehensive_parks_list',
+    'pittsburgh_city_trees_84f6b',
+}
+
+political_dsets = {
+    'allegheny_county_pa_house_of_representative_districts',
+    'allegheny_county_pa_senate_districts',
+    'allegheny_county_pennsylvania_house_of_representatives_district_boundaries',
+    'allegheny_county_voting_district_boundaries_spring_2015_spring_2016',
+    'campaign_finance_contributions',
+    '2011_2015_city_of_pittsburgh_operating_budget',
+    'uncertified_presidential_election_results_allegheny_county_general_election',
+}
 
 # Special tuple type to store rows of our metadata
 FetchableData = namedtuple("data", [
@@ -84,8 +300,8 @@ def extract_metadata(md):
                 'id': res['id'],
                 'package_id': res['package_id'],
                 'revision_id': res['revision_id'],
-                })
-        output.append(parsed)
+            })
+            output.append(parsed)
     return output
 
 def flatten_extracted_data(extracted):
@@ -102,7 +318,7 @@ def flatten_extracted_data(extracted):
                 revision_id = resource['revision_id'],
                 resource_num = str(i),
                 table = None,
-                )
+            )
             output.append(row)
     return output
 
@@ -114,7 +330,7 @@ def metacompare(metadata):
         query = "select revision_id, metadata_modified from metatable where file_id = '{}' limit 1".format(metadata.file_id)
         psql.execute(query)
         try:
-        # Only one result returned, so take the 0th item
+            # Only one result returned, so take the 0th item
             result = psql.cur.fetchall()
         except psql.conn.ProgrammingError as e:
             return True
@@ -181,7 +397,7 @@ def write_binary(url, fpath):
     with open(fpath, 'wb') as f:
         if not response.ok:
             pass
-    # Something went wrong
+        # Something went wrong
         else:
             for block in response.iter_content(1024):
                 f.write(block)
@@ -189,6 +405,8 @@ def write_binary(url, fpath):
 
 def write_text(url, fpath):
     r = requests.get(url)
+    fname = os.path.basename(fpath)
+    fname, file_ext = os.path.splitext(fname)
     try:
         with open(fpath, 'w') as f:
             f.write(r.text)
@@ -197,7 +415,7 @@ def write_text(url, fpath):
         with open(fpath, 'w') as f:
             try:
                 f.write(r.text.encode('UTF-8'))
-                print('Fetched: {}'.format(fpath))
+                print('Fetched: {}'.format(fname))
             except:
                 print('failed. moving on')
     except MemoryError as e:
@@ -211,6 +429,7 @@ def fetch_file_by_url(metadata, url, basedir = "/tmp/pittsburgh", fname = None):
     """Save file from url in designated location"""
     if fname is None:
         fname = os.path.basename(url)
+
     fpath = os.path.join(basedir, fname)
 
     _, file_ext = os.path.splitext(fname)
@@ -229,9 +448,15 @@ def get_dtype(dtype):
     return dtype
 
 
-def insert_to_db(metadata, df, fname):
-    dtypes  = [get_dtype(dtype) for dtype in df.dtypes]
-    columns = [re.sub('[^a-zA-z0-9]', '_', col).lower() for col in df.columns]
+def insert_to_db(metadata, basedir, fname):
+    reader = csv.reader(open(os.path.join(basedir,fname), 'r'))
+    try:
+        columns = reader.__next__()
+    except:
+        columns = reader.next()
+
+    dtypes  = ['TEXT' for _ in columns]
+    columns = [re.sub('[^a-zA-z0-9]', '_', col).lower() for col in columns]
     nums = [str(n) for n in range(10)]
     columns = ["_" + col if col[0] in nums else col for col in columns]
     filename, file_extension = os.path.splitext(fname)
@@ -254,14 +479,13 @@ def insert_to_db(metadata, df, fname):
 
     #make new table and add rows
     try:
-        df = df.fillna('NULL')
         with PostgreSQL(database = 'pittsburgh') as pg:
             pg.create_table(table_name, cols = columns, types = dtypes)
-            pg.add_rows(tuple(df.itertuples(index = False)))
-        md = list(metadata)
-        md[-1] = table_name
-        metadata = FetchableData(*md)
-        update_metadata_db(metadata)
+            pg.add_rows(reader)
+            md = list(metadata)
+            md[-1] = table_name
+            metadata = FetchableData(*md)
+            update_metadata_db(metadata)
     except MemoryError as e:
         print(e)
         print('{} too big!!!!'.format(fname))
@@ -269,17 +493,18 @@ def insert_to_db(metadata, df, fname):
 
 def clean_df(df):
     return df
-    print('cleaning')
-    for i, x in enumerate(df.dtypes):
-        print(i)
-        if str(x) == 'object':
-            col = df.columns[i]
-            try:
-                df[col + '_num'] = df[col].apply(lambda x: float(re.sub('[^0-9]', '', x)))
-            except Exception as e:
-                pass
-                
-    return df
+
+# print('cleaning')
+#     for i, x in enumerate(df.dtypes):
+#         print(i)
+#         if str(x) == 'object':
+#             col = df.columns[i]
+#             try:
+#                 df[col + '_num'] = df[col].apply(lambda x: float(re.sub('[^0-9]', '', x)))
+#             except Exception as e:
+#                 pass
+            
+#     return df
 
 
 def update_file_in_db(metadata, basedir, fname):
@@ -296,17 +521,18 @@ def update_file_in_db(metadata, basedir, fname):
     filename, file_extension = os.path.splitext(fname)
 
     if file_extension.lower() == '.csv':
-        try:
-            df = pd.read_csv(os.path.join(basedir, fname))
-        except:
-            print("Couldn't parse csv: {}".format(fname))
-            return
-        try:
-            df = clean_df(df)
-        except:
-            pass
-        insert_to_db(metadata, df, fname)
-    
+        # try:
+        #     # df = pd.read_csv(os.path.join(basedir, fname))
+        # except:
+        #     print("Couldn't parse csv: {}".format(fname))
+        #     return
+        # try:
+        #     df = clean_df(df)
+        # except:
+        #     pass
+        # insert_to_db(metadata, df, fname)
+        insert_to_db(metadata, basedir, fname)
+        
 
 def fetch_files_by_type(flat_results, data_formats = ("CSV", "KML"), basedir = '/data/pb_files'):
     """Fetch files of specified type"""
@@ -351,7 +577,8 @@ def fetch_files_by_type(flat_results, data_formats = ("CSV", "KML"), basedir = '
             if result.file_format.lower() in ('csv', '.csv'):
                 update_file_in_db(result, subdir, fname)
         else:
-            print("skipping {}".format(fname))
+            pass
+        # print("skipping {}".format(fname))
 
 
 def main():
@@ -363,7 +590,7 @@ def main():
     except:
         pass
 
-    whitelist = police_files
+    whitelist = police_dsets | poverty_dsets | boundaries
     
     if whitelist is not None:
         flat = [d for d in flat if d.name in whitelist]
@@ -375,3 +602,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

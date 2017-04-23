@@ -178,8 +178,10 @@ class PostgreSQL(object):
         if cols is not None:
             self.cols = cols
 
-        for row in rows:
+        for i, row in enumerate(rows):
             row = tuple(row)
+            if i % 10000 == 0 and i > 0:
+                print('{} records'.format(i))
             if not self.add(row):
                 logging.debug('Failed to add row: {}'.format(row))
                 logging.debug('with header: {}'.format(self.cols))
