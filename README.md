@@ -104,7 +104,7 @@ You can now access the website via your instance's public DNS address, at the po
 
 ## Getting data
 
-### Wunderground
+### OpenWeatherMap, Wunderground, Poverty, and Data.gov
 
 
 Make sure Postgres server is already running!
@@ -112,10 +112,37 @@ Make sure Postgres server is already running!
 start_postgres
 ```
 
-Then run:
+There are several datasets available for the user: openweathermap (weather predictions), wunderground (weather history), download_gov_data (pittsburgh crime data), and poverty. First run:
 ```bash
 cd pulling_data
-python wunderground.py
+python download_gov_data.py
 ```
+This has been setup to run with a whitelist of data; the full dataset includes an extremely large volume of unrelated data. If the user wishes to change the data available, they can easily modify the whitelist. download_gov_data.py will pull the data and store it in the pittsburgh database in postgres. Typical run times are around 20 minutes.
 
-This will create the weather table in the pittsburgh database, and will fetch daily historical data from 1990 - 2017
+Similarly, pull down the supporting data sets:
+```
+python openweathermap.py
+python wunderground.py
+python poverty.py
+```
+These will be used for additional follow-on analysis. Historical weather data is from 1990-2017. Weather forecasts are for the five day outlook for predictive analysis. Poverty data for pittsburgh will also be used in the analysis.
+
+### Confirm Data Retrieval
+
+Connect to the data base and perform a few lookups (recommended to be performed in another command window):
+```
+psql -U postgres pittsburgh
+\dt
+select * from police_incident_blotter_archive_0 limit 10;
+```
+Similarly, the user will be prompted to test the other retrieval program successes.
+
+## Setup Analysis and Display
+
+Crime forecasts will be of interest for law enforcement and city officials.
+```
+cd pulling_data
+python createforecasts.py
+```
+This will create two files, forecasts.csv and random_forecasts.csv, which will be located in /data/forecasts for use in later analysis.
+
