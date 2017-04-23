@@ -1,3 +1,110 @@
 <p>Copyright 2017</p>
 
+<script type="text/javascript">
+    var table = 'weather';
+    var X = 'month';
+    var Y = undefined;
+    listen_for_link_click();
+    listen_for_table_click();
+    plot(X, Y);
+
+    function listen_for_link_click() {
+	console.log('listen for link click');
+	$('.X.link').unbind().on('click', function () {
+	    X = $('input.X:checked').val();
+	    plot(X, Y);
+	});
+	$('.Y.link').unbind().on('click', function () {
+	    Y = $('input.Y:checked').val();
+	    plot(X, Y);
+	});
+    }
+
+    $('#tables').on('click', function (){
+	$('#table_links').toggle();
+    });
+
+    function listen_for_table_click(){
+	console.log('listen for table click');
+	$('.tables.link').on('click', function (event) {
+	    console.log(this);
+	    table = $(this).val();
+	    console.log(table);
+	    console.log(table);
+	    console.log(table);
+	    console.log(table);
+	    console.log(table);
+	    console.log(table);
+	    console.log(table);
+	    console.log(table);
+	    console.log(table);
+	    get_cols(table);
+	});
+    }
+
+    function get_cols(table) {
+	console.log('gettings cols for ' + table);
+
+	$('#title').text('Pittsburgh: ' + table);
+	$.get('getcols', {table: table}, function (htmls) {
+	    $('#plot_area').empty();
+	    htmls = JSON.parse(htmls);
+
+	    $('#X_links').html(htmls['X']);
+	    $('#Y_links').html(htmls['Y']);
+
+	    listen_for_link_click();
+	});
+    }
+
+    function plot(X, Y) {
+	$.get('plotter', {table: table, X: X, Y: Y}, function (html) {
+	    $('#plot_area').html(html);
+	})
+
+    }
+     
+     function get_search_params() {
+	 var params = {};
+
+	 // Get all key/value pairs, as separate items
+	 var items = window.location.search.slice(1).split('&')
+	 for(var i = 0; i < items.length; i++)
+	     {
+		 // Split each one and store it in params
+		 var kv = items[i].split('=');
+		 params[kv[0]] = kv[1];
+	     }
+	 return params;
+     } 
+
+     function append_to_url(keyvals) {
+	 var url = window.location.origin;
+	 var params = get_search_params();
+	 for(var i = 0; i < keyvals.length; i++) {
+	     var key = keyvals[i][0];
+	     var val = keyvals[i][1];
+	     if (val == '') {
+		 delete params[key];
+	     } else {
+		 params[key] = val;
+	     }
+	 }
+	 delete params[''];
+	 window.location = url + "?" + $.param(params);
+     }
+
+     function searchbox() {
+	 var searchval = $('#searchbox').val();
+         <!-- append_to_url([['search', searchval]]); -->
+	 return searchval;
+     }
+
+</script>
+<link rel="stylesheet" href="https://cdn.pydata.org/bokeh/release/bokeh-0.12.5.min.css" type="text/css" />
+
+<script type="text/javascript" src="https://cdn.pydata.org/bokeh/release/bokeh-0.12.5.min.js"></script>
+<script type="text/javascript">
+    Bokeh.set_log_level("info");
+</script>
 </body>
