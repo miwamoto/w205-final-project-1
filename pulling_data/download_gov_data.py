@@ -7,6 +7,7 @@ import os
 from collections import defaultdict
 from collections import namedtuple
 import numpy as np
+import csv
 
 ######################################################
 # Parameters to retrieve and save data from data.gov #
@@ -48,7 +49,7 @@ police_files = (
 # Special tuple type to store rows of our metadata
 FetchableData = namedtuple("data", [
     'name', 'metadata_modified', 'file_format', 'url', 'file_id',
-    'package_id', 'revision_id', 'resource_num'])
+    'package_id', 'revision_id', 'resource_num', 'table'])
 
 
 ##############################
@@ -100,6 +101,7 @@ def flatten_extracted_data(extracted):
                 package_id = resource['package_id'],
                 revision_id = resource['revision_id'],
                 resource_num = str(i),
+                table = None,
                 )
             output.append(row)
     return output
@@ -113,27 +115,65 @@ def metacompare(metadata):
         psql.execute(query)
         try:
         # Only one result returned, so take the 0th item
-            currentfile_revision = psql.cur.fetchall()[0]
-            currentfile_modified = psql.cur.fetchall()[1]
-        except:
+            result = psql.cur.fetchall()
+        except psql.conn.ProgrammingError as e:
             return True
-    # If current revision_id and metadata_modified doesn't match the one in table 
-    # mark file for download
-    if metadata.revision_id != currentfile_revision:
-        if metadata.metadata_modified != currentfile_modified:
+
+        try:
+            revision_id = result[0][0]
+            metadata_modified = result[0][1]
+        except IndexError as e:
             return True
-        else:
-            return False
+
+    # If current revision_id or metadata_modified doesn't match the
+    # one in table mark file for download
+    diff_modified = metadata.metadata_modified != metadata_modified
+    diff_revision = metadata.revision_id != revision_id
+
+    if diff_modified or diff_revision:
+        return True
     else:
         return False
 
 def update_metadata_db(metadata):
     """Updates last fetched time in metadata DB"""
+    query1 = "INSERT INTO metatable \
+            (file_id          , \
+            revision_id       , \
+            name              , \
+            metadata_modified , \
+            file_format       , \
+            url               , \
+            package_id        , \
+            resource_num      , \
+            table_name          \
+            ) VALUES (  \
+            '{}', '{}', '{}', '{}', '{}',\
+            '{}', '{}', '{}', '{}')".format(
+                metadata.file_id, 
+                metadata.revision_id, 
+                metadata.name, 
+                metadata.metadata_modified, 
+                metadata.file_format, 
+                metadata.url, 
+                metadata.package_id,
+                metadata.resource_num,
+                metadata.table,
+            )
+    
+
+    query2 = "UPDATE metatable where file_id = '{}' set \
+            revision_id = '{}', \
+            metadata_modified = '{}', \
+            url '{}'".format(
+                metadata.file_id,
+                metadata.revision_id,
+                metadata.metadata_modified,
+                metadata.url
+            )
+
     with PostgreSQL(database = 'pittsburgh') as psql:
-        query = "INSERT INTO metatable set file_id = '{}', revision_id = '{}', name = '{}', metadata_modified = '{}', file_format = '{}', url '{}', package_id = '{}', resource_num = '{}'".format(metadata.file_id, metadata.revision_id, metadata.name, metadata.metadata_modified, metadata.file_format, metadata.url, metadata.package_id,metadata.resource_num)
-        psql.execute(query)
-        query = "UPDATE metatable where file_id = '{}' set revision_id = '{}', metadata_modified = '{}', url '{}'".format(metadata.file_id, metadata.revision_id,metadata.metadata_modified,metadata.url)
-        psql.execute(query)
+        psql.execute(query1, query2)
 
 
 def write_binary(url, fpath):
@@ -218,19 +258,24 @@ def insert_to_db(metadata, df, fname):
         with PostgreSQL(database = 'pittsburgh') as pg:
             pg.create_table(table_name, cols = columns, types = dtypes)
             pg.add_rows(tuple(df.itertuples(index = False)))
+        md = list(metadata)
+        md[-1] = table_name
+        metadata = FetchableData(*md)
+        update_metadata_db(metadata)
     except MemoryError as e:
         print(e)
         print('{} too big!!!!'.format(fname))
 
 
 def clean_df(df):
+    return df
     print('cleaning')
     for i, x in enumerate(df.dtypes):
+        print(i)
         if str(x) == 'object':
             col = df.columns[i]
             try:
                 df[col + '_num'] = df[col].apply(lambda x: float(re.sub('[^0-9]', '', x)))
-                print(df[col + '_num'].dtype)
             except Exception as e:
                 pass
                 
@@ -303,8 +348,8 @@ def fetch_files_by_type(flat_results, data_formats = ("CSV", "KML"), basedir = '
 
         if good_format and metacompare(result):
             fetch_file_by_url(result, url, basedir = subdir, fname = fname)
-            update_file_in_db(result, subdir, fname)
-            # update_metadata_db(result)
+            if result.file_format.lower() in ('csv', '.csv'):
+                update_file_in_db(result, subdir, fname)
         else:
             print("skipping {}".format(fname))
 
