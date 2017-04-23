@@ -12,13 +12,14 @@ def main():
     parser.read('/home/ec2-user/credentials.config')
 
     try:
-        database  = parser.get('POSTGRES' , 'database')
-        user      = parser.get('POSTGRES' , 'user')
-        password  = parser.get('POSTGRES' , 'password')
-        host      = parser.get('POSTGRES' , 'host')
-        port      = parser.get('POSTGRES' , 'port')
-        pittsburgh_db = parser.get('PITTSBURGH'   , 'database')
-        # table     = parser.get('PITTSBURGH'   , 'table')
+        database       = parser.get('POSTGRES'   , 'database')
+        user           = parser.get('POSTGRES'   , 'user')
+        password       = parser.get('POSTGRES'   , 'password')
+        host           = parser.get('POSTGRES'   , 'host')
+        port           = parser.get('POSTGRES'   , 'port')
+        pittsburgh_db  = parser.get('PITTSBURGH' , 'database')
+        clean_database = parser.get('PITTSBURGH' , 'clean_database')
+        # table        = parser.get('PITTSBURGH' , 'table')
 
     except configparser.NoSectionError as e:
         print("##############################")
@@ -31,44 +32,70 @@ def main():
         print("")
         raise e
 
-    # Forge a strong connection with postgres
-    conn = pg.connect(database = database,
-                            user     = user,
-                            password = password,
-                            host     = host,
-                            port     = port)
-
     try:
-        # Nothing can keep us apart
+        conn = pg.connect(database = database,
+                                user     = user,
+                                password = password,
+                                host     = host,
+                                port     = port)
+
         # CREATE DATABASE can't run inside a transaction
         conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
         cur = conn.cursor()
         cur.execute("CREATE DATABASE {}".format(pittsburgh_db))
-        cur.close()
-        conn.close()
     except:
-        # Well, something might. If it does...
         print("Could not create {}".format(pittsburgh_db))
+        conn.rollback()
+    finally:
+        conn.close()
+        
+    try:
+        # Do the same for the 'clean' database
+        # This is what will collect our batched data
+        # CREATE DATABASE can't run inside a transaction
+        conn = pg.connect(database = database,
+                                user     = user,
+                                password = password,
+                                host     = host,
+                                port     = port)
 
-    # Connect to our new database
-    conn = pg.connect(database = pittsburgh_db,
-                      user     = user,
-                      password = password,
-                      host     = host,
-                      port     = port)
+        conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        cur = conn.cursor()
+        cur.execute("CREATE DATABASE {}".format(clean_database))
+    except:
+        print("Could not create {}".format(clean_database))
+        conn.rollback()
+    finally:
+        conn.close()
 
 
-    cur = conn.cursor()
+    # And create our metadata table
+    try:
+        # Connect to our new database
+        conn = pg.connect(database = pittsburgh_db,
+                        user     = user,
+                        password = password,
+                        host     = host,
+                        port     = port)
 
-    # # And create our table
-    # try:
-    #     cur.execute('''CREATE TABLE {}
-    #         (word TEXT PRIMARY KEY     NOT NULL,
-    #         count INT     NOT NULL);'''.format(table))
-    #     conn.commit()
-    # finally: # ~~FIN~~ #
-    #     conn.close()
-    
+        cur = conn.cursor()
+
+        conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+        cur.execute(' CREATE TABLE metatable ( \
+            file_id           TEXT PRIMARY KEY NOT NULL,\
+            revision_id       TEXT             NOT NULL,\
+            name              TEXT             NOT NULL,\
+            metadata_modified TEXT             NOT NULL,\
+            file_format       TEXT             NOT NULL,\
+            url               TEXT             NOT NULL,\
+            package_id        TEXT             NOT NULL,\
+            resource_num      TEXT             NOT NULL)' )
+        conn.commit()
+    except Exception as e:
+        print(e)
+        conn.rollback()
+    finally:
+        conn.close()
 
 if __name__ == '__main__':
     main()

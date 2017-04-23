@@ -1,16 +1,15 @@
-<h3>Tables</h3>
+<h3 class="header" id = "tables">Tables</h3>
 <div id="table_links">
   {% for item in tables %}
-  <p><a class="tables link" value="{{ item }}">{{ item }} </a></p>
+  <!-- <p><a class="tables link" value="{{ item }}">{{ item }} </a></p> -->
+ <label > <input type="radio" name="table" class="tables link" value="{{ item }}" />&nbsp;{{ item }} </label><br>
   {% endfor %}
 </div>
 
 <h3>X Value</h3>
 <div id="X_links">
   {% for item in X %}
-  <p>
-    <a class="X link" value="{{ item }}">{{ item }} </a>
-  </p>
+ <label > <input type="radio" name="X" class="X link" value="{{ item }}" />&nbsp;{{ item }} </label><br>
   {% endfor %}
 </div>
 
@@ -18,33 +17,13 @@
 <h3>Y Value</h3>
 <div id="Y_links">
   {% for item in Y %}
-  <p>
-    <a class="Y link" value="{{ item }}">{{ item }} </a>
-  </p>
+ <label > <input type="radio" name="Y" class="Y link" value="{{ item }}" />&nbsp;{{ item }} </label><br>
   {% endfor %}
 </div>
 
 <h3>Group By</h3>
 <div id="groupby_links">
   {% for item in groupby %}
-  <p>
-    <a class="groupby link" value="{{ item }}">{{ item }} </a>
-  </p>
+ <label > <input type="radio" name="groupby" class="groupby link" value="{{ item }}" />&nbsp;{{ item }} </label><br>
   {% endfor %}
 </div>
-
-
-<script type="text/javascript">
- $('.tables.link').click(function (event) {
-     event.preventDefault();
-     append_to_url([['table', $(this).attr('value') ], ['X', ''], ['Y', '']]); return false;
-});
- $('.X.link').click(function (event) {
-     event.preventDefault();
-     append_to_url([['X', $(this).attr('value') ]]); return false;
-});
- $('.Y.link').click(function (event) {
-     event.preventDefault();
-     append_to_url([['Y', $(this).attr('value') ]]); return false;
-});
-</script>
