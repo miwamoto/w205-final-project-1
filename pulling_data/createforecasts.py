@@ -24,6 +24,8 @@ def main():
         query = "SELECT incidenttime, incidentneighborhood FROM police_incident_blotter_archive_2"
         psql.execute(query)
         rows = psql.cur.fetchall()
+    
+    print('Retrieved crime data')
 
     # place crime data into a DataFrame
     crime_df = pd.DataFrame(rows, columns=['incidenttime', 'neighborhood'])
@@ -51,7 +53,7 @@ def main():
     crime_df = pd.concat([crime_df,weekday_dummies,month_dummies], axis=1)
 
     # count incidents by date and neighborhood
-    agg_df = mydf.groupby(['ymd','neighborhood'], as_index=False)['incidenttime'].count()
+    agg_df = crime_df.groupby(['ymd','neighborhood'], as_index=False)['incidenttime'].count()
     agg_df = agg_df.rename(columns={'incidenttime':'num_incidents'})
     agg_df['key'] = agg_df['ymd'].map(str) + agg_df['neighborhood']
 
@@ -69,7 +71,9 @@ def main():
 
     # add dummies to aggregates
     dummies = ['key','date','mon','tue','wed','thu','fri','sat','sun','jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec']
-    agg_df = pd.merge(left=agg_df, right=mydf[dummies], on=['key'], how='left')
+    agg_df = pd.merge(left=agg_df, right=crime_df[dummies], on=['key'], how='left')
+
+    print('Aggregated crime data and created features')
 
     # query for poverty data
     with PostgreSQL(database = 'pittsburgh') as psql:
@@ -83,6 +87,8 @@ def main():
     # join poverty to aggregates
     agg_df = pd.merge(left=agg_df, right=poverty_df, on=['neighborhood'], how='left')
 
+    print('Retrieved and joined demographic data')
+
     # query for weather data
     with PostgreSQL(database = 'pittsburgh') as psql:
         query = "SELECT year, month, day, temp_f_high, events FROM weather WHERE year > 2005"
@@ -90,13 +96,15 @@ def main():
         rows = psql.cur.fetchall()
 
     # place weather data into a DataFrame
-    weather_df = pd.DataFrame(rows, columns=['year', 'month', 'day', 'temp_high', 'events')
-    weather_df['ymd'] = 10000 * mydf['year'] + 100 * mydf['month'] + mydf['day']
+    weather_df = pd.DataFrame(rows, columns=['year', 'month', 'day', 'temp_high', 'events'])
+    weather_df['ymd'] = 10000 * weather_df['year'] + 100 * weather_df['month'] + weather_df['day']
     weather_df['weather'] = weather_df['events'].map(lambda x: np.where(x=='NULL',1,0))
 
     # join weather to aggregates
     columns = ['ymd','temp_high','weather']
     agg_df = pd.merge(left=agg_df, right=weather_df[columns], on=['ymd'], how='left')
+
+    print('Retrieved, transformed and joined weather data')
 
     # add neighborhood numbers
     mymap = {}
@@ -108,23 +116,36 @@ def main():
     # create final table of feature by removing duplicate rows
     agg_df = agg_df.drop_duplicates()
     agg_df = agg_df.reset_index(drop=True)
+    
+    df = agg_df[np.isfinite(agg_df['percent_poverty'])]
+    df = df[np.isfinite(df['temp_high'])]
 
-    y = agg_df['incidents']
+    print('Clean data for null or infinity values')
+
+    y = df['num_incidents']
     features = ['nbh', 'jan1', '1stm', '15thm', 'dec25', 'mon', 'tue', 'wed', 'thu', 'fri',
            'sat', 'sun', 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul',
            'aug', 'sep', 'oct', 'nov', 'dec', 'percent_poverty', 'temp_high', 'weather']
-    X = agg_df[features]
+    X = df[features]
 
     lr = LinearRegression()
     model = lr.fit(X,y)
 
-    os.mkdir(path)
+    print('Fitted forecast model')
+
+    try:
+        os.mkdir(path)
+    except:
+        pass
 
     with open(path + 'forecasts.csv', 'w') as myfile:
         for i in list(model.coef_):
             myfile.write(str(i) + '\n')                                          
                                              
     create_forecasts(path, mymap)
+
+    print('Success!')
+    print('Written forecasts to files in /data/forecasts')
                                              
 if __name__ == '__main__':
     main()
