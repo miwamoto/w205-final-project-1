@@ -17,6 +17,11 @@ def get_neighborhood_poverty(df, nbh):
     else:
         return 'NA'
 
+def get_X_Y(df, nbh):
+    X = list(df[df['neighborhood']==nbh]['X'])
+    Y = list(df[df['neighborhood']==nbh]['Y'])
+    return X, Y
+    
 def create_dummies(vect,v,n):
     for i in range(n):
         if i == v:
@@ -189,6 +194,24 @@ def main():
     wf_df['datetime'] = wf_df['ymd'].apply(dateparse)
     wf_df['dayofweek'] = wf_df['datetime'].map(lambda x: x.dayofweek)
 
+    with PostgreSQL(database = 'pittsburgh') as psql:
+        query = "SELECT incidentneighborhood, x, y FROM police_incident_blotter_archive_2"
+        psql.execute(query)
+        rows = psql.cur.fetchall()
+
+    # place crime data into a DataFrame
+    XY_df = pd.DataFrame(rows, columns=['neighborhood','x','y'])
+    XY_df = XY_df[XY_df['x']!='NaN']
+    XY_df = XY_df[XY_df['y']!='NaN']
+
+    XY_df['X'] = pd.to_numeric(XY_df['x'])
+    XY_df['Y'] = pd.to_numeric(XY_df['y'])
+
+    # count incidents by date and neighborhood
+    aveXY_df = XY_df.groupby(['neighborhood'], as_index=False)[['X','Y']].mean()
+    aveXY_df = aveXY_df[aveXY_df['neighborhood']!='']
+    aveXY_df
+    
     # get list of forecast dates
     ymd_list = list(wf_df['ymd'])
 
@@ -197,20 +220,26 @@ def main():
 
     # populate first row of results
     results = []
-    result = []
-    result.append('Neighborhood') 
-    for ymd in ymd_list:
-        result.append(get_value_from_wf_df(wf_df,ymd,'datetime'))
+    result = ['Neighborhood','X','Y','P1','P2','P3','P4','P5']
+#     result.append('Neighborhood') 
+#     result.append('X') 
+#     result.append('Y') 
+#     for ymd in ymd_list:
+#         result.append(get_value_from_wf_df(wf_df,ymd,'datetime'))
     results.append(result)
     for neighborhood in mymap.keys():
-
-        # prediction result vector for neighborhood
-        result = [neighborhood]
 
         # feature inputs
         nbh = mymap[neighborhood]
         max_nbh = np.max(list(mymap.values()))
+        X, Y = get_X_Y(aveXY_df, neighborhood)
         poverty = get_neighborhood_poverty(poverty_df,neighborhood)
+        
+        # prediction result vector for neighborhood
+        result = [neighborhood]
+        result.append(X[0])
+        result.append(Y[0])
+
         if poverty == 'NA': # can't make a forecast
             result.append('NA')
             result.append('NA')
