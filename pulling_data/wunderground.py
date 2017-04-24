@@ -2,6 +2,14 @@ from bs4 import BeautifulSoup as bs
 import requests
 import re
 from postgres.PostgreSQL import PostgreSQL
+from sqlalchemy import create_engine
+import pandas as pd
+
+engine = create_engine(
+    "postgresql+psycopg2://postgres:postgres@localhost:5432/pittsburgh",
+    isolation_level="READ UNCOMMITTED"
+)
+
 
 MONTHS = {'Jan': 1,
           'Feb': 2,
@@ -38,10 +46,10 @@ TYPES = [
     'FLOAT', 'TEXT']
 
 
-def fetch_year_of_weather(year, daily = True):
+def fetch_year_of_weather(year = 1990, month = 1, day = 1, daily = True):
     """Fetch daily or summary stats for a year in Pittsburgh"""
 
-    url = 'https://www.wunderground.com/history/airport/KAGC/{}/1/1/CustomHistory.html?dayend=31&monthend=12&yearend={}&req_city=&req_state=&req_statename=&reqdb.zip=&reqdb.magic=&reqdb.wmo=&MR=1'.format(year, year)
+    url = 'https://www.wunderground.com/history/airport/KAGC/{}/{}/{}/CustomHistory.html?dayend=31&monthend=12&yearend={}&req_city=&req_state=&req_statename=&reqdb.zip=&reqdb.magic=&reqdb.wmo=&MR=1'.format(year, month, day, year)
 
     # Get html and get both table elements from page
     r = requests.get(url)
@@ -110,7 +118,22 @@ def parse_td(td):
 
 def main():
     cur_month = None
-    years = range(1990, 2018)
+    min_year = 1990
+    max_year = 2017
+    try:
+        wdf = pd.read_sql('weather', engine)
+        last_day = wdf.tail(1)
+        d = last_day['day']
+        m = last_day['month']
+        y = last_day['year']
+        min_year = int(y) + 1
+        rows = parse_year_table(fetch_year_of_weather(y, m, d), year)
+        with PostgreSQL(table = 'weather', database = 'pittsburgh') as psql:
+            psql.add_rows(rows, types = types, cols = cols)
+    except:
+        pass
+        
+    years = range(min_year, max_year + 1)
 
     with PostgreSQL(database = 'pittsburgh') as psql:
         cols = [re.sub('[()\.%]','',col) for col in HEADER]
