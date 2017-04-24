@@ -267,10 +267,16 @@ def main():
 
     print('Success!')
 
-    result_df = pd.DataFrame(results[1:], columns= results[0])
+    result_df = pd.DataFrame(results[1:], columns= results[0], dtype = np.float64)
 
 
-    result_df.to_sql('crime_forecasts', clean_engine)
+    for c in range(1,6):
+        c = str(c)
+        result_df['P' + c] = result_df['P' + c].where(
+            result_df['P' + c] != 'NA', np.nan)
+        result_df['P' + c] = result_df['P' + c].astype(np.float64)
+
+    result_df.to_sql('crime_forecasts', clean_engine, if_exists = 'replace')
     print('Wrote forecasts to pittsburgh_clean db in table: crime_forecasts')
 
     with open(path + 'forecasts.csv', 'w') as myfile:
