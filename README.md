@@ -133,11 +133,23 @@ python createforecasts.py
 ```
 This will create two files, forecasts.csv and random_forecasts.csv, which will be located in /data/forecasts for use in later analysis.
 
+
 ## Serving Layer
+
+### Geographic Information System Components (GIS)
+
+To process the data from the Pittsburgh database, run
+```
+cd gis_ipynb_example
+python arcGISinterface.py
+```
+This process ingests the data and creates resources known as layers and datasets that can be used for geospatial analysis.  These components are stored in an online respository (ESRI ArcGIS online). Further, these resources are published so that they become part of a large searchable repository of GIS features and maps.
 
 ### Jupyter Notebooks
 
-There are two jupyter notbooks available: GIS and forecasts. The GIS notebook is available here:
+There are two jupyter notbooks available: GIS and forecasts. 
+The GIS notebook, `Interacting_with_Pittsburgh_Data_with_Jupyter_and_ArcGIS.ipynb` demonstrates how the GIS resources created in the process above can be used for analysis with Python and its associated tools such as pandas, NumPy and SciPy. You can read more about this API for Python at `https://developers.arcgis.com/python/` To view the example notebook, start Jupyter notebook as indicated below.
+
 ```
 cd gis_ipynb_example 
 jupyter-notebook
