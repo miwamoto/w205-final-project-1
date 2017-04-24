@@ -399,14 +399,15 @@ def update_metadata_db(metadata):
             )
     
 
-    query2 = "UPDATE metatable where file_id = '{}' set \
+    query2 = "UPDATE metatable set \
             revision_id = '{}', \
             metadata_modified = '{}', \
-            url '{}'".format(
-                metadata.file_id,
+            url = '{}'\
+            where file_id = '{}'".format(
                 metadata.revision_id,
                 metadata.metadata_modified,
-                metadata.url
+                metadata.url,
+                metadata.file_id,
             )
 
     with PostgreSQL(database = 'pittsburgh') as psql:
@@ -506,6 +507,18 @@ def insert_to_db(metadata, basedir, fname):
             md[-1] = table_name
             metadata = FetchableData(*md)
             update_metadata_db(metadata)
+            # This is ugly and must be improved
+            # but is being used as a stopgap measure
+            # since some datasets add new data (e.g.,
+            # weekly/last 30 days), while others just add to
+            # the existing files
+            pg.execute('DROP TABLE tmp')
+            pg.execute('CREATE TABLE tmp AS \
+                SELECT DISTINCT * from {}'.format(table_name))
+            pg.execute('DROP TABLE {}'.format(table_name))
+            pg.execute('CREATE TABLE {} AS \
+                SELECT DISTINCT * from tmp'.format(table_name))
+                
     except MemoryError as e:
         print(e)
         print('{} too big!!!!'.format(fname))
@@ -580,15 +593,12 @@ def main():
     except:
         pass
 
-    whitelist = police_dsets | poverty_dsets | boundaries | map_dsets | health_dsets
+    whitelist = set(police_dsets | poverty_dsets | boundaries | map_dsets | health_dsets)
     
     if whitelist is not None:
         flat = [d for d in flat if d.name in whitelist]
     elif blacklist is not None:
         flat = [d for d in flat if d.name not in blacklist]
-
-    for f in whitelist:
-        print(f)
 
     fetch_files_by_type(flat, download_formats, basedir = BASEDIR)
 
