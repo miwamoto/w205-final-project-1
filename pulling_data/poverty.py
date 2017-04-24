@@ -35,6 +35,8 @@ def fetch_poverty_data():
 def main():
     # Create poverty table
     with PostgreSQL(database = 'pittsburgh') as psql:
+        # Small enough to fetch again each time
+        psql.execute('drop table poverty')
         cols = HEADERS
         types = TYPES
         psql.create_table(table = 'poverty', cols = cols, types = types)
