@@ -68,7 +68,9 @@ def fetch_weather_forecasts():
     return forecasts
 
 def main():
+        
     with PostgreSQL(database = 'pittsburgh') as psql:
+        psql.execute('drop table weather_forecasts')
         cols = HEADERS
         types = TYPES
         psql.create_table(table = 'weather_forecasts', cols = cols, types = types)
