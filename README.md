@@ -15,7 +15,7 @@ You must mount an EBS volume to store the Postgres database. If you are using th
 ```
 startup
 ```
-to mount the drive (assuming it's in the default location of /dev/xvdf).
+to mount the drive (assuming it's in the default location of /dev/xvdf). If this is the initial setup, it will give a warning about directory /data/pittsburgh_db/data which will be created in the next step. Please proceed.
 
 If you are using a new volume, run the following to format the drive at the given location and then mount it:
 ```
@@ -83,26 +83,7 @@ with PostgreSQL(table = 'test', database = 'pittsburgh') as psql:
     psql.add_rows(rows, cols = COLS, types = TYPES)
 ```
 
-You can see a more complete example in pulling_data/wunderground.py
-
-### Jupyter Notebooks
-```
-cd gis_ipynb_example # or wherever your notebooks are
-jupyter-notebook
-```
-You can now access your notebooks over the web via your instance's public DNS address, at the port 2017 (e.g., ec2-XX-XXX-XX-XXX.compute-1.amazonaws.com:2017)
-
-
-### HTML
-The server is currently set up to run CherryPy, a simple Python webserver. To start the webserver, run:
-```
-cd html_example
-python main.py
-```
-You can now access the website via your instance's public DNS address, at the port 8080 (e.g., ec2-XX-XXX-XX-XXX.compute-1.amazonaws.com:8080)
-
-
-## Getting data
+## Data Ingestion
 
 ### OpenWeatherMap, Wunderground, Poverty, and Data.gov
 
@@ -127,7 +108,7 @@ python poverty.py
 ```
 These will be used for additional follow-on analysis. Historical weather data is from 1990-2017. Weather forecasts are for the five day outlook for predictive analysis. Poverty data for pittsburgh will also be used in the analysis.
 
-### Confirm Data Retrieval
+#### Confirm Data Retrieval
 
 Connect to the data base and perform a few lookups (recommended to be performed in another command window):
 ```
@@ -137,12 +118,39 @@ select * from police_incident_blotter_archive_0 limit 10;
 ```
 Similarly, the user will be prompted to test the other retrieval program successes.
 
-## Setup Analysis and Display
+## Batch Processing
+
+For updating the data, this can be done in batches. Importantly, before running forecasts, be sure to run the batch update for the latest data.this will retrieve updated weather forecasts in addition to any new police data (updated nightly).
+```
+cd ~/batch_processing
+python batch.py
+```
 
 Crime forecasts will be of interest for law enforcement and city officials.
 ```
-cd pulling_data
+cd ~/pulling_data
 python createforecasts.py
 ```
 This will create two files, forecasts.csv and random_forecasts.csv, which will be located in /data/forecasts for use in later analysis.
 
+## Serving Layer
+
+### Jupyter Notebooks
+
+There are two jupyter notbooks available: GIS and forecasts. The GIS notebook is available here:
+```
+cd gis_ipynb_example 
+jupyter-notebook
+```
+You can now access your notebooks over the web via your instance's public DNS address, at the port 2017 (e.g., ec2-
+XX-XXX-XX-XXX.compute-1.amazonaws.com:2017)
+
+
+### HTML
+The server is currently set up to run CherryPy, a simple Python webserver. To start the webserver, run:
+```
+cd html_example
+python main.py
+```
+You can now access the website via your instance's public DNS address, at the port 8080 (e.g., ec2-XX-XXX-XX-XXX.co
+mpute-1.amazonaws.com:8080)
