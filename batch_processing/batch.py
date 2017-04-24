@@ -248,15 +248,23 @@ def clean_df(df, dset):
 
 for i, dset in enumerate(good_datasets):
     print(i, dset)
-    df_buffer = pd.read_sql(dset, engine, chunksize = 10000)
+    #
+    with PostgreSQL(database = 'pittsburgh') as psql:
+        try:
+            psql.execute('drop table tmp')
+        except:
+            psql.conn.rollback()
+        psql.execute('CREATE TABLE tmp as SELECT DISTINCT * from {}'.format(dset))
+        
+    df_buffer = pd.read_sql('tmp', engine, chunksize = 10000)
     for j, df in enumerate(df_buffer):
         if j > 0:
             print('{}0k records'.format(j))
         df = clean_df(df, dset)
-        if j == 0:
-            types = [DTYPE_CONVERSION[str(x)] for x in df.dtypes]
-            with PostgreSQL(database = 'pittsburgh_clean') as psql:
-                psql.create_table(table = dset, types = types, cols = df.columns)
+        # if j == 0:
+        #     types = [DTYPE_CONVERSION[str(x)] for x in df.dtypes]
+        #     with PostgreSQL(database = 'pittsburgh_clean') as psql:
+        #         psql.create_table(table = dset, types = types, cols = df.columns)
         
         
         df.to_sql(dset, clean_engine, if_exists = 'replace', index = False)
