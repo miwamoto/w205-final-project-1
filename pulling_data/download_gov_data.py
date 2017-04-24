@@ -199,6 +199,13 @@ police_dsets = {
     'pittsburgh_police_sectors_5f5e5',
     'pittsburgh_police_zones_4763f',
     'non_traffic_citations',
+    'pittsburgh_police_arrest_data_0',
+    'pittsburgh_police_sectors_5f5e5_3',
+    'pittsburgh_police_zones_4763f_3',
+    'police_incident_blotter_30_day_0',
+    'police_incident_blotter_archive_0',
+    'police_incident_blotter_archive_2',
+    'non_traffic_citations_0',
 }
 
 health_dsets = {
@@ -214,6 +221,7 @@ health_dsets = {
     'allegheny_county_anxiety_medication',
     'allegheny_county_depression_medication',
     'allegheny_county_fatal_accidental_overdoses',
+    'allegheny_county_fatal_accidental_overdoses_2'
     'allegheny_county_hospitals',
     'allegheny_county_hypertension_hospitalization',
 }
@@ -222,6 +230,13 @@ poverty_dsets = {
     'allegheny_county_poor_housing_conditions',
     'neighborhoods_with_snap_data_3d3a9',
     'pgh_snap',
+    'pgh_snap_13',
+    'pgh_snap_14',
+    'pgh_snap_16',
+    'pgh_snap_17',
+    'pgh_snap_18',
+    'pgh_snap_19',
+    'pgh_snap_20',    
 }
 
 other_dsets = {
@@ -593,7 +608,7 @@ def main():
     except:
         pass
 
-    whitelist = police_dsets | poverty_dsets | boundaries | map_dsets
+    whitelist = police_dsets | poverty_dsets | boundaries | map_dsets | health_dsets
     
     if whitelist is not None:
         flat = [d for d in flat if d.name in whitelist]
