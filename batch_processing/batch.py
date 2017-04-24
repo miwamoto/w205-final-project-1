@@ -210,7 +210,7 @@ def clean_df(df, dset):
     return df
     
 
-for i, dset in enumerate(good_datasets[-1:]):
+for i, dset in enumerate(good_datasets):
     print(i, dset)
     df_buffer = pd.read_sql(dset, engine, chunksize = 10000)
     for j, df in enumerate(df_buffer):
