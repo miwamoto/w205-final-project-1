@@ -128,7 +128,7 @@ python batch.py
 
 Crime forecasts will be of interest for law enforcement and city officials.
 ```
-cd ~/pulling_data
+cd ~/batch
 python createforecasts.py
 ```
 This will create two files, forecasts.csv and random_forecasts.csv, which will be located in /data/forecasts for use in later analysis.
