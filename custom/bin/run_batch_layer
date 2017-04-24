@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Each batch will
+# Each batch will:
 
 # Pull latest weather forecasts (for crime forecasting script)
 python /home/ec2-user/pulling_data/openweathermap.py
