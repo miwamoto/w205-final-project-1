@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 import os
 import json
+from sqlalchemy import create_engine
 
 database = 'pittsburgh_clean'
 
@@ -27,12 +28,30 @@ def fetch_tables(search = None, limit = 10):
 
 
 def plot(table = None, X = None, Y = None, groupby = None, limit = 5000):
+    print('##########')
+    print('##########')
+    print('##########')
+    print('##########')
+    print('##########')
+    print('##########')
+    print('##########')
+    print('##########')
+    print('##########')
+    print('##########')
     colnames, _ = get_col_names(table)
+    print(colnames)
     X = X if X in colnames else None
     Y = Y if Y in colnames else None
+    print(X, Y)
+    print(X, Y)
+    print(X, Y)
+    print(X, Y)
+    print(X, Y)
 
     if table is not None:
+        print(table)
         df = get_df(cols = [x for x in (X, Y, ) if x is not None], table = table, limit = limit)
+        print(df.head())
     else:
         return 'Please select a table'
 
@@ -98,6 +117,11 @@ def get_df(table, cols = None, limit = None):
             df.columns = list(cols)
     # df = df[list(cols)]
         # df.columns = columns
+    print(df.columns)
+    print(df.columns)
+    print(df.columns)
+    print(df.columns)
+    print(df.columns)
     return df
 
 
@@ -157,6 +181,17 @@ class TableFetcher(object):
 class Plotter(object):
     @cherrypy.tools.accept(media='text/plain')
     def GET(self, table = 'weather', X = None, Y = None, limit = 5000, groupby = None):
+        print(table, X, Y, limit, groupby)
+        print(table, X, Y, limit, groupby)
+        print(table, X, Y, limit, groupby)
+        print(table, X, Y, limit, groupby)
+        print(table, X, Y, limit, groupby)
+        print(table, X, Y, limit, groupby)
+        print(table, X, Y, limit, groupby)
+        print(table, X, Y, limit, groupby)
+        print(table, X, Y, limit, groupby)
+        print(table, X, Y, limit, groupby)
+        print(table, X, Y, limit, groupby)
         html = plot(table, X, Y, limit, groupby)
         return html
 
