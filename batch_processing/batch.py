@@ -23,18 +23,7 @@ MAX_LONG = -79.8
 
 DTYPE_CONVERSION = {'int64': "INT", 'float64': "FLOAT", 'object': "VARCHAR", 'datetime64[ns]': 'VARCHAR'}
 
-good_datasets = {
-    'police_incident_blotter_archive': {'table': {}},
-    'pittsburgh_police_arrest_data': {},
-    'police_incident_blotter_30_day': {},
-    'pittsburgh_police_zones_4763f': {},
-    'police_community_outreach': {},
-    'police_civil_actions': {},
-    'pittsburgh_police_sectors_5f5e5': {},
-}
-
-good_datasets = [
-        'weather_forecasts',
+good_datasets = [    'weather_forecasts',
     'weather',
     'poverty',
     # 'allegheny_county_anxiety_medication_0',
@@ -79,6 +68,52 @@ good_datasets = [
     'police_incident_blotter_archive_2',
     # 'state_of_aging_in_allegheny_county_survey_2',
     # 'state_of_aging_in_allegheny_county_survey_3',
+
+
+    'allegheny_county_anxiety_medication_0',
+    'allegheny_county_anxiety_medication_1',
+    'allegheny_county_boundary_3',
+    'allegheny_county_crash_data_15',
+    'allegheny_county_depression_medication_0',
+    'allegheny_county_depression_medication_1',
+    'allegheny_county_diabetes_hospitalization_0',
+    'allegheny_county_diabetes_hospitalization_1',
+    'allegheny_county_fatal_accidental_overdoses_1',
+    'allegheny_county_fatal_accidental_overdoses_2',
+    'allegheny_county_hypertension_hospitalization_0',
+    'allegheny_county_hypertension_hospitalization_1',
+    # 'allegheny_county_jail_daily_census_0',
+    # 'allegheny_county_land_cover_areas_3',
+    'allegheny_county_median_age_at_death_0',
+    'allegheny_county_median_age_at_death_1',
+    'allegheny_county_municipal_boundaries_3',
+    'allegheny_county_obesity_rates_1',
+    'allegheny_county_obesity_rates_2',
+    'allegheny_county_poor_housing_conditions_0',
+    'allegheny_county_poor_housing_conditions_1',
+    'allegheny_county_primary_care_access_0',
+    'allegheny_county_primary_care_access_1',
+    'allegheny_county_smoking_rates_0',
+    'allegheny_county_smoking_rates_1',
+    'allegheny_county_zip_code_boundaries_3',
+    # 'autonomous_vehicle_survey_of_bicyclists_and_pedestrians_in_pitt',
+    'diabetes_0',
+    'diabetes_1',
+    # 'geocoders_0',
+    'hyperlipidemia_0',
+    'hyperlipidemia_1',
+    'hypertension_0',
+    'hypertension_1',
+    # 'metatable',
+    'neighborhoods_with_snap_data_3d3a9_3',
+    'non_traffic_citations_0',
+    'pgh_snap_13',
+    'pgh_snap_14',
+    'pgh_snap_16',
+    'pgh_snap_17',
+    'pgh_snap_18',
+    'pgh_snap_19',
+    'pgh_snap_20',
 ]
 
 replacements = {
@@ -215,7 +250,8 @@ for i, dset in enumerate(good_datasets):
     print(i, dset)
     df_buffer = pd.read_sql(dset, engine, chunksize = 10000)
     for j, df in enumerate(df_buffer):
-        print(j)
+        if j > 0:
+            print('{}0k records'.format(j))
         df = clean_df(df, dset)
         if j == 0:
             types = [DTYPE_CONVERSION[str(x)] for x in df.dtypes]
@@ -223,5 +259,5 @@ for i, dset in enumerate(good_datasets):
                 psql.create_table(table = dset, types = types, cols = df.columns)
         
         
-        df.to_sql(dset, clean_engine, if_exists = 'append', index = False)
+        df.to_sql(dset, clean_engine, if_exists = 'replace', index = False)
 

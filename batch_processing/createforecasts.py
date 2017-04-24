@@ -162,7 +162,8 @@ def main():
     # Call for weather forecast data to create prediction vectors
     
     weather_forecasts_df = pd.read_sql('weather_forecasts', clean_engine, columns = ['year', 'month',
-                                                                 'day', 'temp', 'events'])
+                                                'day', 'temp', 'events'])
+
 
     weather_forecasts_df['ymd'] = 10000 * weather_forecasts_df['year'] + 100 * weather_forecasts_df['month'] + weather_forecasts_df['day']
 
@@ -276,7 +277,7 @@ def main():
             result_df['P' + c] != 'NA', np.nan)
         result_df['P' + c] = result_df['P' + c].astype(np.float64)
 
-    result_df.to_sql('crime_forecasts', clean_engine, if_exists = 'replace')
+    result_df.to_sql('crime_forecasts', clean_engine, if_exists = 'replace', index = None)
     print('Wrote forecasts to pittsburgh_clean db in table: crime_forecasts')
 
     with open(path + 'forecasts.csv', 'w') as myfile:

@@ -615,6 +615,9 @@ def main():
     elif blacklist is not None:
         flat = [d for d in flat if d.name not in blacklist]
 
+    for f in whitelist:
+        print(f)
+
     fetch_files_by_type(flat, download_formats, basedir = BASEDIR)
 
 
