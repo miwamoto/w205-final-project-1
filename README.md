@@ -15,7 +15,7 @@ You must mount an EBS volume to store the Postgres database. If you are using th
 ```
 startup
 ```
-to mount the drive (assuming it's in the default location of /dev/xvdf).
+to mount the drive (assuming it's in the default location of /dev/xvdf). If this is the initial setup, it will give a warning about directory /data/pittsburgh_db/data which will be created in the next step. Please proceed.
 
 If you are using a new volume, run the following to format the drive at the given location and then mount it:
 ```
