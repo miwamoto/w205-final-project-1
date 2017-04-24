@@ -11,8 +11,8 @@ from arcgis.gis import GIS
 
 ACCOUNT = 'miwamotoDEV'
 FORECASTFILE = 'forecasts.csv'
-FORECASTPATH = ''
-BASEDIR = '/data/forcasts'
+FORECASTPATH = '/data/forecasts/'
+BASEDIR = '/data/pb_files/'
 
 def logon_to_arcgis():
     
@@ -85,7 +85,7 @@ def main():
         
     
     ### Import Neighborhood GeoSpacial Info
-    csv_path = BASEDIR + '/ZIP/pittsburgh_neighborhoods_64095_5.zip'
+    csv_path = BASEDIR + 'ZIP/pittsburgh_neighborhoods_64095_5.zip'
     csv_properties = {'title': 'Pittsburgh Neighborhoods',
                  'description':'Pittsburgh Neighborhood Shapefile downloaded from data.gov',
                  'tags':'arcgis, python, Pittsburgh, neighborhood'}
@@ -100,7 +100,7 @@ def main():
  
 
     ### Import Neighborhood GeoSpacial SNAP Data     
-    csv_path = BASEDIR + '/ZIP/neighborhoods_with_snap_data_3d3a9_5.zip' 
+    csv_path = BASEDIR + 'ZIP/neighborhoods_with_snap_data_3d3a9_5.zip' 
     csv_properties = {'title': 'Pittsburgh Neighborhoods with SNAP Data',
                      'description':'Pittsburgh Neighborhood SNAP data downloaded from data.gov',
                      'tags':'arcgis, python, Pittsburgh, neighborhood'}
@@ -115,7 +115,7 @@ def main():
    
 
     ### Import latest Incident Probability Data
-    csv_path = FORECASTPATH+ FORECASTFILE
+    csv_path = FORECASTPATH + FORECASTFILE
     csv_properties = {'title': 'Pittsburgh Incident Forecast',
                  'description':'Pittsburgh Incident Forecast',
                  'tags':'arcgis, python, Pittsburgh, arrests, crime'}
