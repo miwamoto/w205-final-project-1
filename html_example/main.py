@@ -12,8 +12,10 @@ import pandas as pd
 import os
 import json
 
+database = 'pittsburgh_clean'
+
 def fetch_tables(search = None, limit = 10):
-    with PostgreSQL(database = 'pittsburgh') as psql:
+    with PostgreSQL(database = database) as psql:
         query = "select DISTINCT table_name from information_schema.columns where table_schema = 'public'"
         if search is not None:
             query += " and table_name like '%{}%'".format(search)
@@ -58,7 +60,7 @@ def plot(table = None, X = None, Y = None, groupby = None, limit = 5000):
 
 
 def get_col_names(table):
-    with PostgreSQL(table = table, database = 'pittsburgh') as psql:
+    with PostgreSQL(table = table, database = database) as psql:
         query = "select column_name, data_type from information_schema.columns \
             where table_name = '{}'".format(table)
         psql.execute(query)
@@ -87,7 +89,7 @@ def get_df(table, cols = None, limit = None):
     else:
         predicates = ''
 
-    with PostgreSQL(database = 'pittsburgh', table = table) as psql:
+    with PostgreSQL(database = database, table = table) as psql:
         # query = "select {} from {}".format(columns, table, )
         # psql.execute(query)
         # columns = [col[0] for col in ]
