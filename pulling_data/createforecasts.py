@@ -4,6 +4,13 @@ import numpy as np
 from datetime import datetime
 from sklearn.naive_bayes import MultinomialNB
 import os, sys
+from sqlalchemy import create_engine
+
+clean_engine = create_engine(
+    "postgresql+psycopg2://postgres:postgres@localhost:5432/pittsburgh_clean",
+    isolation_level="READ UNCOMMITTED"
+)
+
 
 path = "/data/forecasts/"
 
@@ -37,53 +44,40 @@ def ymd_check(vect,ymd,v):
         vect.append(0)
     return vect
 
-def create_forecasts(path, mymap):
-    n = sorted(mymap.keys())
-    num = len(n)
-    results = np.random.rand(num,5)
-    with open(path + 'random_forecasts.csv', 'w') as myfile:
-        for i in range(num):
-            my_str = n[i]
-            for j in range(5):
-                my_str += ',' + str(results[i][j])
-            myfile.write(my_str + '\n')
-
 def main():
-    with PostgreSQL(database = 'pittsburgh') as psql:
-        query = "SELECT incidenttime, incidentneighborhood FROM police_incident_blotter_archive_2"
-        psql.execute(query)
-        rows = psql.cur.fetchall()
+    crime_df = pd.read_sql('police_incident_blotter_archive_2', clean_engine)
 
     print('Retrieved crime data')
 
-    # place crime data into a DataFrame
-    crime_df = pd.DataFrame(rows, columns=['incidenttime', 'neighborhood'])
+    crime_df.columns = ['unique_id', 'incident_number', 'hierarchy',
+    'datetime', 'incident_location', 'clearedflag',
+    'neighborhood', 'zone', 'hierarchydesc', 'offenses', 'tract',
+    'longitude', 'latitude', 'hour', 'minute', 'month', 'day', 'year',
+    'day_of_year', 'week_of_year', 'dayofweek']
+
 
     # parse the string dates into datetime format and create various date-based features
-    dateparse = lambda x: pd.datetime.strptime(x, '%m/%d/%Y %H:%M')
-    crime_df['datetime'] = crime_df['incidenttime'].apply(dateparse)
+    crime_df['datetime'] = pd.to_datetime(crime_df['datetime'])
     crime_df['date'] = crime_df['datetime'].map(lambda x: x.date())
-    crime_df['year'] = crime_df['datetime'].map(lambda x: int(x.strftime('%Y')))
-    crime_df['month'] = crime_df['datetime'].map(lambda x: int(x.strftime('%m')))
-    crime_df['day'] = crime_df['datetime'].map(lambda x: int(x.strftime('%d')))
-    crime_df['dayofweek'] = crime_df['datetime'].map(lambda x: x.dayofweek)
-    crime_df['ymd'] = crime_df['datetime'].map(lambda x: int(10000*x.year + 100*x.month + x.day))
+    crime_df['ymd'] = crime_df['year'] * 10000 + crime_df['month'] * 100 + crime_df['day']
     crime_df['key'] = crime_df['ymd'].map(str) + crime_df['neighborhood']
 
     # create weekday dummies
     weekday_dummies = pd.get_dummies(crime_df['dayofweek'])
-    weekday_dummies = weekday_dummies.rename(columns={0:'mon', 1:'tue', 2:'wed', 3:'thu', 4:'fri', 5:'sat', 6:'sun'})
+    weekday_dummies = weekday_dummies.rename(columns={0:'mon', 1:'tue', 2:'wed',
+                                                      3:'thu', 4:'fri', 5:'sat', 6:'sun'})
 
     # create month dummies
     month_dummies = pd.get_dummies(crime_df['month'])
-    month_dummies = month_dummies.rename(columns={1:'jan', 2:'feb', 3:'mar', 4:'apr', 5:'may', 6:'jun', 7:'jul', 8:'aug', 9:'sep', 10:'oct', 11:'nov', 12:'dec'})
+    month_dummies = month_dummies.rename(columns={1:'jan', 2:'feb', 3:'mar', 4:'apr',
+                    5:'may', 6:'jun', 7:'jul', 8:'aug', 9:'sep', 10:'oct', 11:'nov', 12:'dec'})
 
     # join dummies to crime_df
     crime_df = pd.concat([crime_df,weekday_dummies,month_dummies], axis=1)
 
     # count incidents by date and neighborhood
-    agg_df = crime_df.groupby(['ymd','neighborhood'], as_index=False)['incidenttime'].count()
-    agg_df = agg_df.rename(columns={'incidenttime':'num_incidents'})
+    agg_df = crime_df.groupby(['ymd','neighborhood'], as_index=False)['datetime'].count()
+    agg_df = agg_df.rename(columns={'datetime':'num_incidents'})
     agg_df['key'] = agg_df['ymd'].map(str) + agg_df['neighborhood']
 
     # feature creation Jan 1 dummy
@@ -99,19 +93,14 @@ def main():
     agg_df['dec25'] = agg_df['ymd'].map(lambda x: np.where(str(x)[-4:]=='1225',1,0))
 
     # add dummies to aggregates
-    dummies = ['key','date','mon','tue','wed','thu','fri','sat','sun','jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec']
+    dummies = ['key','date','mon','tue','wed','thu','fri','sat','sun',
+               'jan','feb','mar','apr','may', 'jun','jul','aug','sep','oct','nov','dec']
     agg_df = pd.merge(left=agg_df, right=crime_df[dummies], on=['key'], how='left')
 
     print('Aggregated crime data and created features')
 
     # query for poverty data
-    with PostgreSQL(database = 'pittsburgh') as psql:
-        query = "SELECT neighborhood, percent_poverty FROM poverty"
-        psql.execute(query)
-        rows = psql.cur.fetchall()
-
-    # place poverty data into a DataFrame
-    poverty_df = pd.DataFrame(rows, columns=['neighborhood', 'percent_poverty'])
+    poverty_df = pd.read_sql('poverty', clean_engine, columns = ['neighborhood', 'percent_poverty'])
 
     # join poverty to aggregates
     agg_df = pd.merge(left=agg_df, right=poverty_df, on=['neighborhood'], how='left')
@@ -119,18 +108,15 @@ def main():
     print('Retrieved and joined demographic data')
 
     # query for weather data
-    with PostgreSQL(database = 'pittsburgh') as psql:
-        query = "SELECT year, month, day, temp_f_high, events FROM weather WHERE year > 2004"
-        psql.execute(query)
-        rows = psql.cur.fetchall()
-
-    # place weather data into a DataFrame
-    weather_df = pd.DataFrame(rows, columns=['year', 'month', 'day', 'temp_high', 'events'])
+    weather_df = pd.read_sql('weather', clean_engine, columns = ['year', 'month',
+                                                                 'day', 'temp_f_high', 'events'])
+    weather_df = weather_df[weather_df['year'] > 2004]
+    
     weather_df['ymd'] = 10000 * weather_df['year'] + 100 * weather_df['month'] + weather_df['day']
     weather_df['weather'] = weather_df['events'].map(lambda x: np.where(x=='NULL',0,1))
 
     # join weather to aggregates
-    columns = ['ymd','temp_high','weather']
+    columns = ['ymd','temp_f_high','weather']
     agg_df = pd.merge(left=agg_df, right=weather_df[columns], on=['ymd'], how='left')
     agg_df = agg_df[agg_df['neighborhood']!='']
 
@@ -151,17 +137,19 @@ def main():
     agg_df = pd.concat([agg_df, pd.get_dummies(agg_df['nbh'])], axis=1); agg_df
 
     df = agg_df[np.isfinite(agg_df['percent_poverty'])]
-    df = df[np.isfinite(df['temp_high'])]
+    df = df[np.isfinite(df['temp_f_high'])]
 
     print('Clean data for null or infinity values')
 
     y = df['num_incidents']
     # regression features (exclude 'sun' and 'dec' to avoid multicolinearity)
-    features = ['percent_poverty', 'temp_high', 'weather', 'jan1', '1stm', '15thm', 'dec25', 'mon', 'tue', 'wed', 'thu', 'fri',
-           'sat', 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul',
-           'aug', 'sep', 'oct', 'nov' ]
+    features = ['percent_poverty', 'temp_f_high', 'weather', 'jan1', '1stm', '15thm', 'dec25',
+                'mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'jan',
+           'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep',
+           'oct', 'nov' ]
     for key in mymap.keys():
         features.append(mymap[key])
+
     # exclude last neighborhood to avoid multicolinearity
     features = features[:-1] 
     X = df[features]
@@ -172,14 +160,11 @@ def main():
     print('Fitted forecast model')
 
     # Call for weather forecast data to create prediction vectors
-    with PostgreSQL(database = 'pittsburgh') as psql:
-        query = "SELECT year, month, day, temp, events FROM weather_forecasts"
-        psql.execute(query)
-        rows = psql.cur.fetchall()
+    
+    weather_forecasts_df = pd.read_sql('weather_forecasts', clean_engine, columns = ['year', 'month',
+                                                                 'day', 'temp', 'events'])
 
-    weather_forecasts_df = pd.DataFrame(rows, columns=['year', 'month', 'day', 'temp', 'events'])
     weather_forecasts_df['ymd'] = 10000 * weather_forecasts_df['year'] + 100 * weather_forecasts_df['month'] + weather_forecasts_df['day']
-    weather_forecasts_df
 
     wf_df = weather_forecasts_df.groupby(['ymd'], as_index=False)['temp'].max()
     events = weather_forecasts_df.groupby(['ymd'], as_index=False)['events'].count()
@@ -194,18 +179,12 @@ def main():
     wf_df['datetime'] = wf_df['ymd'].apply(dateparse)
     wf_df['dayofweek'] = wf_df['datetime'].map(lambda x: x.dayofweek)
 
-    with PostgreSQL(database = 'pittsburgh') as psql:
-        query = "SELECT incidentneighborhood, x, y FROM police_incident_blotter_archive_2"
-        psql.execute(query)
-        rows = psql.cur.fetchall()
 
-    # place crime data into a DataFrame
-    XY_df = pd.DataFrame(rows, columns=['neighborhood','x','y'])
-    XY_df = XY_df[XY_df['x']!='NaN']
-    XY_df = XY_df[XY_df['y']!='NaN']
-
-    XY_df['X'] = pd.to_numeric(XY_df['x'])
-    XY_df['Y'] = pd.to_numeric(XY_df['y'])
+    XY_df = pd.read_sql('police_incident_blotter_archive_2', clean_engine,
+                        columns = ['latitude', 'longitude', 'incident_neighborhood'])
+    XY_df.columns = ['X', 'Y', 'neighborhood']
+    XY_df = XY_df[XY_df['X']!=np.nan]
+    XY_df = XY_df[XY_df['Y']!=np.nan]
 
     # count incidents by date and neighborhood
     aveXY_df = XY_df.groupby(['neighborhood'], as_index=False)[['X','Y']].mean()
@@ -221,11 +200,7 @@ def main():
     # populate first row of results
     results = []
     result = ['Neighborhood','X','Y','P1','P2','P3','P4','P5']
-#     result.append('Neighborhood') 
-#     result.append('X') 
-#     result.append('Y') 
-#     for ymd in ymd_list:
-#         result.append(get_value_from_wf_df(wf_df,ymd,'datetime'))
+                                                                                     
     results.append(result)
     for neighborhood in mymap.keys():
 
@@ -290,6 +265,14 @@ def main():
     except:
         pass
 
+    print('Success!')
+
+    result_df = pd.DataFrame(results[1:], columns= results[0])
+
+
+    result_df.to_sql('crime_forecasts', clean_engine)
+    print('Wrote forecasts to pittsburgh_clean db in table: crime_forecasts')
+
     with open(path + 'forecasts.csv', 'w') as myfile:
         for result in results:
             my_str = ''
@@ -298,10 +281,7 @@ def main():
             my_str = my_str[:-1]
             myfile.write(my_str + '\n')                                           
                                              
-    create_forecasts(path, mymap)
-
-    print('Success!')
-    print('Written forecasts to files in /data/forecasts')
+    print('Wrote forecasts to files in /data/forecasts')
                                              
 if __name__ == '__main__':
     main()
