@@ -12,7 +12,7 @@ from arcgis.gis import GIS
 ACCOUNT = 'miwamotoDEV'
 FORECASTFILE = 'forecasts.csv'
 FORECASTPATH = ''
-BASEDIR = '/data/pb_files'
+BASEDIR = '/data/forcasts'
 
 def logon_to_arcgis():
     
