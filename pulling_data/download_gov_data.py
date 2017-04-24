@@ -31,7 +31,7 @@ BINARY_FORMATS = ('ZIP', 'GIF', 'JPG')
 BASEDIR = '/data/pb_files'
 
 # Formats to download
-download_formats = ('CSV',)
+download_formats = ('CSV', 'ZIP')
 
 whitelist = None
 
@@ -175,7 +175,10 @@ maps = {
     'movepgh_project_map',
     'geocoders',
     'pittsburgh_map',
-    'pittsburgh_neighborhoods_map',
+}
+
+map_dsets = {
+    'pittsburgh_Neighborhoods_map',
     'pittsburgh_neighborhoods_64095',
 }
 
@@ -590,7 +593,7 @@ def main():
     except:
         pass
 
-    whitelist = police_dsets | poverty_dsets | boundaries
+    whitelist = police_dsets | poverty_dsets | boundaries | map_dsets
     
     if whitelist is not None:
         flat = [d for d in flat if d.name in whitelist]
