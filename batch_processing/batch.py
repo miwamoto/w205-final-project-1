@@ -34,6 +34,7 @@ good_datasets = {
 }
 
 good_datasets = [
+        'weather_forecasts',
     'weather',
     'poverty',
     # 'allegheny_county_anxiety_medication_0',
