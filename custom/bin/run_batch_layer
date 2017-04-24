@@ -9,4 +9,4 @@ python /home/ec2-user/pulling_data/openweathermap.py
 python /home/ec2-user/batch_processing/batch.py
 
 # Generate new crime forecasts 
-python /home/ec2-user/batch_processing/create_forecasts.py
+python /home/ec2-user/batch_processing/createforecasts.py
