@@ -18,7 +18,6 @@ import csv
 api_url = 'https://catalog.data.gov/api/3/action/package_search'
 query_url = '?q=Allegheny%20County%20/%20City%20of%20Pittsburgh%20/%20Western%20PA%20Regional%20Data%20Center'
 search_url = api_url + query_url
-# arrest_url = 'https://data.wprdc.org/datastore/dump/e03a89dd-134a-4ee8-a2bd-62c40aeebc6f'
 
 # In case we need to rename extensions
 EXTENSIONS = {'CSV': 'csv', 'HTML': 'html', 'ZIP': 'zip'}
@@ -323,6 +322,8 @@ def extract_metadata(md):
     return output
 
 def flatten_extracted_data(extracted):
+    """Change nested metadata to flat structure"""
+
     output = []
     for result in extracted:
         for i, resource in enumerate(result['resources']):
@@ -342,7 +343,8 @@ def flatten_extracted_data(extracted):
 
 
 def metacompare(metadata):
-    #Query the database to see if we should download new data
+    """Query the database to see if we should download new data"""
+
     with PostgreSQL(database = 'pittsburgh') as psql:
         # Find the file id, retrieve its revision id
         query = "select revision_id, metadata_modified from metatable where file_id = '{}' limit 1".format(metadata.file_id)
@@ -371,6 +373,7 @@ def metacompare(metadata):
 
 def update_metadata_db(metadata):
     """Updates last fetched time in metadata DB"""
+
     query1 = "INSERT INTO metatable \
             (file_id          , \
             revision_id       , \
@@ -411,6 +414,8 @@ def update_metadata_db(metadata):
 
 
 def write_binary(url, fpath):
+    """Write binary files differently than plaintext"""
+
     response = requests.get(url, stream=True)
     with open(fpath, 'wb') as f:
         if not response.ok:
@@ -422,6 +427,8 @@ def write_binary(url, fpath):
 
 
 def write_text(url, fpath):
+    """Write plaintext files, possibly streaming"""
+
     r = requests.get(url)
     fname = os.path.basename(fpath)
     fname, file_ext = os.path.splitext(fname)
@@ -445,6 +452,7 @@ def write_text(url, fpath):
 
 def fetch_file_by_url(metadata, url, basedir = "/tmp/pittsburgh", fname = None):
     """Save file from url in designated location"""
+
     if fname is None:
         fname = os.path.basename(url)
 
@@ -458,15 +466,9 @@ def fetch_file_by_url(metadata, url, basedir = "/tmp/pittsburgh", fname = None):
         write_text(url, fpath)
 
 
-def get_dtype(dtype):
-    try:
-        dtype = DTYPE_CONVERSION[str(dtype)]
-    except KeyError:
-        dtype = 'STRING'
-    return dtype
-
-
 def insert_to_db(metadata, basedir, fname):
+    """Insert files from dataset to same table or own tables"""
+
     reader = csv.reader(open(os.path.join(basedir,fname), 'r'))
     try:
         columns = reader.__next__()
@@ -509,46 +511,16 @@ def insert_to_db(metadata, basedir, fname):
         print('{} too big!!!!'.format(fname))
 
 
-def clean_df(df):
-    return df
-
-# print('cleaning')
-#     for i, x in enumerate(df.dtypes):
-#         print(i)
-#         if str(x) == 'object':
-#             col = df.columns[i]
-#             try:
-#                 df[col + '_num'] = df[col].apply(lambda x: float(re.sub('[^0-9]', '', x)))
-#             except Exception as e:
-#                 pass
-            
-#     return df
-
-
 def update_file_in_db(metadata, basedir, fname):
     """Use new file to update database"""
 
-    #TODO actually update DB
-    # Pandas is good about inferring types
-    # and can interface directly with sqlalchemy
-    # I was thinking we could use the name of the dataset as the table
-    # name--Try to create the table based on inferred types. If it
-    # already exists, add the new data to it.
+    # TODO 
     # Will need to figure out how to append vs update values
     
     filename, file_extension = os.path.splitext(fname)
 
+    # Only write csv files to the database
     if file_extension.lower() == '.csv':
-        # try:
-        #     # df = pd.read_csv(os.path.join(basedir, fname))
-        # except:
-        #     print("Couldn't parse csv: {}".format(fname))
-        #     return
-        # try:
-        #     df = clean_df(df)
-        # except:
-        #     pass
-        # insert_to_db(metadata, df, fname)
         insert_to_db(metadata, basedir, fname)
         
 

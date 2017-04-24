@@ -4,7 +4,6 @@
 import psycopg2
 from collections import defaultdict
 import sys
-import logging
 
 class PostgreSQL(object):
     """Update database in safely
@@ -12,12 +11,14 @@ class PostgreSQL(object):
     This class should be used as a context so that its database
     connection will be released gracefully. If not in a context, the
     class will connect and disconnect on every update or batch of updates.
+    
+    sqlalchemy should be preferred when using pandas, but this offers
+    a great deal of flexibility and customized functions.
     """
 
     def __init__(self, table = None, database = "pittsburgh", user = 'postgres',
                  password = 'postgres', host = 'localhost',
-                 port = '5432', cols = None, types = None,
-                 log_file = '/tmp/postgres.log'):
+                 port = '5432', cols = None, types = None):
 
         self.database = database
         self.table    = table
@@ -27,9 +28,6 @@ class PostgreSQL(object):
         self.port     = port
         self.cols     = cols
         self.types    = types
-
-        self.log_file    = log_file
-        logging.basicConfig(filename=self.log_file, level=logging.DEBUG)
 
         self._str_types = {'TEXT', 'CHAR', 'CHARACTER',
                            'CHARACTER VARYING', 'VARCHAR'}
@@ -87,7 +85,6 @@ class PostgreSQL(object):
         except AttributeError as e:
             msg = 'Connection may not have been open'
             print(msg)
-            logging.debug(msg)
 
 
     def create_table(self, table, cols, types):
@@ -183,9 +180,7 @@ class PostgreSQL(object):
             if i % 10000 == 0 and i > 0:
                 print('{} records'.format(i))
             if not self.add(row):
-                logging.debug('Failed to add row: {}'.format(row))
-                logging.debug('with header: {}'.format(self.cols))
-
+                pass
          
     
     def execute(self, query, fallback_query = None):
