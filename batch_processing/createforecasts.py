@@ -200,7 +200,7 @@ def main():
 
     # populate first row of results
     results = []
-    result = ['Neighborhood','X','Y','P1','P2','P3','P4','P5']
+    result = ['Neighborhood','Y','X','P1','P2','P3','P4','P5']
                                                                                      
     results.append(result)
     for neighborhood in mymap.keys():
