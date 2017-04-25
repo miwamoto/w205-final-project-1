@@ -220,21 +220,38 @@ class Root:
 
 
     @cherrypy.expose
-    def map(self, webmap = '7694ded02a524c97ae145fa3648081a9'):
-        maps = ['?', 'Arrest Data']
-        webmaps = ['461a2d2ddb91480f9f732a90f42a290f',
-                   'arrest']
-        webmap = ''.format(webmap)
+    def map(self, webmap = 'crime_forecast'):
+        maps = ['Crime Forecast', 'Arrest Data', ]
+        webmaps = [
+                   'crime_forecast',
+                   'arrest',
+        ]
+        try:
+            title = maps[webmaps.index(webmap)]
+        except:
+            title = ''
+
         env = Environment(loader=FileSystemLoader('templates'))
+        print(webmap)
+        print(webmap)
+        print(webmap)
+        print(webmap)
+        print(webmap)
+        print(webmap)
+        print(webmap)
+        print(webmap)
+        print(webmap)
+        print(webmap)
         if webmap == 'arrest':
             tmpl = env.get_template('arrest_map.html')
+        elif webmap == 'crime_forecast':
+            tmpl = env.get_template('forecast_map.html')
         else:
             tmpl = env.get_template('map.html')
 
         return tmpl.render(salutation='Pittsburgh: ',
-                           target='Crime Heatmap',
-                           title = "Crime Heatmap",
-                           webmap = webmap,
+                           target = title,
+                           title  = title,
                            tables = zip(maps, webmaps),
         )
     

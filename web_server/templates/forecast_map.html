@@ -1,0 +1,11 @@
+{% include 'header.html' %}
+<h1>{{ salutation }} {{ target }}</h1>
+<div class="container">
+  <div class="main_content row">
+    <div class="sidebar col-sm-2">{% include 'map_sidebar.html' %}</div>
+    <div class="main col-sm-10" style="width:800px;height:600px;">
+      <iframe width="800" height="600" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" title="Pittsburgh 5 Day Incident Forecast" src="//miwamoto.maps.arcgis.com/apps/Embed/index.html?webmap=ae3496453720434b9a9f890e6801b5cd&amp;extent=-80.0725,40.3864,-79.883,40.4764&amp;zoom=true&amp;scale=true&amp;disable_scroll=true&amp;theme=light"></iframe>
+    </div>
+  </div>
+</div>
+{% include 'footer.html' %}
