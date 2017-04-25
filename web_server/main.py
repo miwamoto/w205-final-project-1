@@ -89,7 +89,6 @@ def plot(table = None, X = None, Y = None, groupby = None, limit = 5000):
     X = X if X in colnames else None
     Y = Y if Y in colnames else None
 
-    print(X, Y)
     if table is not None:
         df = get_df(cols = [x for x in (X, Y, ) if x is not None], table = table, limit = limit)
     else:
@@ -175,31 +174,7 @@ class Root:
         tables = fetch_tables(search, table_limit)
 
         colnames, dtypes = get_col_names(table)
-        if table == 'weather':
-            for x, y in zip(colnames, dtypes):
-                print(x, y)
         numeric, categorical = split_col_types(table)
-        print('###########')
-        print('###########')
-        print('###########')
-        print('###########')
-        print('###########')
-        print('###########')
-        print('###########')
-        print('###########')
-        print('###########')
-        print('###########')
-        print('###########')
-        print('###########')
-        print('###########')
-        print('###########')
-        print('###########')
-        print('###########')
-        print('###########')
-        print('###########')
-        print('###########')
-        print('###########')
-
 
         return tmpl.render(salutation ='Pittsburgh: ',
                         target     = '', 
