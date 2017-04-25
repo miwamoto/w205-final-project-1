@@ -6,7 +6,7 @@
   {% endfor %}
 </div>
 
-<h3>X Value</h3>
+<h3 id="X_header">X Value</h3>
 <div id="X_links">
   {% for item in X %}
  <label > <input type="radio" name="X" class="X link" value="{{ item }}" />&nbsp;{{ item }} </label><br>
@@ -14,14 +14,14 @@
 </div>
 
 
-<h3>Y Value</h3>
+<h3 id="Y_header">Y Value</h3>
 <div id="Y_links">
   {% for item in Y %}
  <label > <input type="radio" name="Y" class="Y link" value="{{ item }}" />&nbsp;{{ item }} </label><br>
   {% endfor %}
 </div>
 
-<h3>Group By</h3>
+<h3 id="group_header">Group By</h3>
 <div id="groupby_links">
   {% for item in groupby %}
  <label > <input type="radio" name="groupby" class="groupby link" value="{{ item }}" />&nbsp;{{ item }} </label><br>
