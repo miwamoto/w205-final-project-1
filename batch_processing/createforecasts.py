@@ -280,13 +280,17 @@ def main():
     result_df.to_sql('crime_forecasts', clean_engine, if_exists = 'replace', index = None)
     print('Wrote forecasts to pittsburgh_clean db in table: crime_forecasts')
 
-    with open(path + 'forecasts.csv', 'w') as myfile:
+    with open(path + 'temp.csv', 'w') as myfile:
         for result in results:
             my_str = ''
             for i in result:
                 my_str += str(i) + ','
             my_str = my_str[:-1]
-            myfile.write(my_str + '\n')                                           
+            myfile.write(my_str + '\n')     
+            
+    df = pd.read_csv('temp.csv')
+    df = df.dropnas(how='any')
+    df.to_csv('forecasts.csv')
                                              
     print('Wrote forecasts to files in /data/forecasts')
                                              
