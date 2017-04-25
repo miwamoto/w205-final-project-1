@@ -96,13 +96,20 @@ start_postgres
 
 The ingestion layer retrieves several raw datasets and makes them available for the user: openweathermap (weather predictions), wunderground (weather history), download_gov_data (pittsburgh crime data), and poverty (Pittsburgh neighborhood poverty).
 
-Run:
+The following command will pull down all data from several data sources and store them in the `pittsburgh` database. The scripts do incremental updates when possible. For example, the script to pull historical weather data will only pull new data after it is run once.
+
+The data.gov sources are tracked by their metadata identifiers. The first time running this command will download all data, and store their metadata in the table `metatable` in the `pittsburgh` database. Each subsequent time the batch layer is run, the new metadata is compared against the metadata stored in `metatable` to see if new data is available. If so, it will pull the new data, and ensure there are no duplicates in the table. If the metadata matches what was previously downloaded, that dataset will not be downloaded again.
+
+When possible, separate files from a given dataset are combined into one table (and all duplicates are discarded). If the data are not compatible, they are stored in separate tables.
+
+Run this command to download all data for the analysis:
 ```bash
 run_ingestion_layer
 ```
 
 That command runs all of the following (i.e. there is NO need to run anything further for the *Data Ingestion* section):
 
+This file (called by `run_ingestion_layer`) is responsible for retrieving the data from data.gov and managing the `metatable`:
 ```bash
 cd pulling_data
 python download_gov_data.py
@@ -110,8 +117,8 @@ python download_gov_data.py
 
 This has been setup to run with a whitelist of data; the full dataset includes an extremely large volume of unrelated data. If the user wishes to change the data available, they can easily modify the whitelist. download_gov_data.py will pull the data and store it in the pittsburgh database in postgres. Typical run times are around 20 minutes.
 
-Similarly, it will also pull down the supporting data sets:
-```
+Similarly, `run_batch_layer` will also pull down the supporting data sets. The poverty dataset and the weather forecasts are small downloads, and we want the current data, so we download these every thing the batch layer runs, and replace the prior tables. As previously mentioned, the Weather Underground script (wunderground.py) does incremental updates.
+```bash
 python openweathermap.py
 python wunderground.py
 python poverty.py
