@@ -12,4 +12,4 @@ python /home/ec2-user/batch_processing/batch.py
 python /home/ec2-user/batch_processing/createforecasts.py
 
 # Run Mapping scripts
-python /home/ec2-user/batch_processing/gis_processing/arcGISinterface.py
+python /home/ec2-user/gis_processing/arcGISinterface.py
