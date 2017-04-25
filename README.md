@@ -2,7 +2,7 @@
 
 ## Setup
 
-This project requires a custom AMI with pre-installed software. Please check with Zach Ingbretsen to receive the AMI if you do not already have access.
+This project requires a custom AMI with pre-installed software. Please check with Zach Ingbretsen to receive the AMI if you do not already have access. Use a "medium" or higher machine to run the code.
 
 ### Git
 Please run this on every new AMI version
