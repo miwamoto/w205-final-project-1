@@ -156,7 +156,7 @@ python openweathermap.py
 Next the batch layer runs a command that selects tables of interest, and processes them into a usable form. As previously mentioned, the raw data are stored as TEXT only. This stage does type-checking and conversions in a pseudo-schema-on-read manner. The data stored upstream are relatively unconstrained.
 
 In this stage, we convert numerical values to numerical datatypes. This includes strings that include dollar signs, percentages, and commas, which are not automatically parsed as numbers by pandas. When possible, it splits dates and times into their component parts. Column names are standardized (as much as possible) and particularly obscure ones are converted into human-readable form. Some of this was automated, but much of it was hand-coded to catch specific edge cases.
-```
+```bash
 cd ~/batch_processing
 python batch.py
 ```
@@ -164,7 +164,7 @@ python batch.py
 ### Machine learned crime incidence forecasts
 
 Crime forecasts will be of interest for law enforcement and city officials. This is just a first step in the development of the classifier, but it endeavors to predict the probability of crime occurring in different neighborhoods in the city of Pittsburgh.
-```
+```bash
 python createforecasts.py
 ```
 
@@ -173,8 +173,8 @@ As well as posting to the database this will also create forecasts.csv which wil
 
 ### Geographic Information System Components (GIS)
 
-To process the data from the Pittsburgh database, run
-```
+The following script (also a part of `run_batch_layer`) creates new layers for our GIS maps. It uses the forecasts generated in the previous step, so it makes sense to include it in the batch layer.
+```bash
 python arcGISinterface.py
 ```
 
@@ -185,25 +185,28 @@ This process ingests the data and creates resources known as layers and datasets
 
 ### Jupyter Notebooks
 
-There is one jupyter notebooks available for GIS.
+There is one jupyter notebook available for GIS.
 
 The GIS notebook, `Interacting_with_Pittsburgh_Data_with_Jupyter_and_ArcGIS.ipynb` demonstrates how the GIS resources created in the process above can be used for analysis with Python and its associated tools such as pandas, NumPy and SciPy. 
 
 You can read more about this API for Python at `https://developers.arcgis.com/python/` To view the example notebook, start Jupyter notebook as indicated below.
 
 ```
-cd gis_ipynb_example 
+cd gis_processing
 jupyter-notebook
 ```
-You can now access your notebooks over the web via your instance's public DNS address, at the port 2017 (e.g., ec2-
-XX-XXX-XX-XXX.compute-1.amazonaws.com:2017)
+You can now access your notebooks over the web via your instance's public DNS address, at the port 2017 (e.g., ec2-XX-XXX-XX-XXX.compute-1.amazonaws.com:2017). Be sure this port is open to your IP address, but no others. The password will be provided to you separately.
 
 
 ### HTML
 The server is currently set up to run CherryPy, a simple Python webserver. To start the webserver, run:
 ```
-cd html_example
+cd web_server
 python main.py
 ```
-You can now access the website via your instance's public DNS address, at the port 8080 (e.g., ec2-XX-XXX-XX-XXX.co
-mpute-1.amazonaws.com:8080)
+
+You can now access the website via your instance's public DNS address, at the port 8080 (e.g., ec2-XX-XXX-XX-XXX.compute-1.amazonaws.com:8080). Make sure this port is open to your IP address.
+
+The web interface grants you access to the data in the cleaned databased. Currently, it supports scatterplots of two numerical values and histograms of single numerical variables. It can be used to plot out latitude/longitude coordinates or visualize simple trends in time series data.
+
+The site provides links to some of the ArcGIS maps generated, to a Jupyter Notebook for working with the data, and our team's GitHub page.
