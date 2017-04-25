@@ -144,14 +144,14 @@ def main():
     y = df['num_incidents']
     # regression features (exclude 'sun' and 'dec' to avoid multicolinearity)
     features = ['percent_poverty', 'temp_f_high', 'weather', 'jan1', '1stm', '15thm', 'dec25',
-                'mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'jan',
+                'mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun', 'jan',
            'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep',
-           'oct', 'nov' ]
+           'oct', 'nov', 'dec' ]
     for key in mymap.keys():
         features.append(mymap[key])
 
     # exclude last neighborhood to avoid multicolinearity
-    features = features[:-1] 
+    # features = features[:-1] 
     X = df[features]
 
     clf = MultinomialNB()
@@ -200,7 +200,7 @@ def main():
 
     # populate first row of results
     results = []
-    result = ['Neighborhood','X','Y','P1','P2','P3','P4','P5']
+    result = ['Neighborhood','Y','X','P1','P2','P3','P4','P5']
                                                                                      
     results.append(result)
     for neighborhood in mymap.keys():
@@ -247,15 +247,15 @@ def main():
                 # Dec 25
                 curr_vect = ymd_check(curr_vect, str(ymd)[-2:], '1225')
                 # add weekday dummies
-                curr_vect = create_dummies(curr_vect,dayofweek,6)
+                curr_vect = create_dummies(curr_vect,dayofweek,7)
                 # add month dummies
-                curr_vect = create_dummies(curr_vect,month,11)
+                curr_vect = create_dummies(curr_vect,month,12)
                 # add weekday dummies
-                curr_vect = create_dummies(curr_vect,nbh,max_nbh-1)
+                curr_vect = create_dummies(curr_vect,nbh,max_nbh)
                 # print(curr_vect)
                 pred = 0
                 try:
-                    pred = round(clf.predict_proba(np.array(curr_vect).reshape(1, -1)).item(0),4)
+                    pred = round(1-clf.predict_proba(np.array(curr_vect).reshape(1, -1)).item(0),4)
                 except:
                     pass
                 result.append(pred)
