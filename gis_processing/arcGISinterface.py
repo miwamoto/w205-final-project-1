@@ -116,9 +116,9 @@ def main():
 
     ### Import latest Incident Probability Data
     csv_path = FORECASTPATH + FORECASTFILE
-    csv_properties = {'title': 'Pittsburgh Incident Forecast',
-                 'description':'Pittsburgh Incident Forecast',
-                 'tags':'arcgis, python, Pittsburgh, arrests, crime'}
+    csv_properties = {'title': 'Pittsburgh 5 Day Incident Forecast',
+                 'description':'Pittsburgh 5 DayIncident Forecast',
+                 'tags':'arcgis, Pittsburgh, arrests, crime, forcast'}
     thumbnail_path = r'handcuffs.png'
 
     crime_csv_item = save_layer(csv_properties, csv_path, thumbnail_path)
