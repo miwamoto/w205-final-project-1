@@ -2,6 +2,8 @@
 
 ## Setup
 
+This project requires a custom AMI with pre-installed software. Please check with Zach Ingbretsen to receive the AMI if you do not already have access.
+
 ### Git
 Please run this on every new AMI version
 ```bash
