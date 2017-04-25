@@ -87,26 +87,35 @@ with PostgreSQL(table = 'test', database = 'pittsburgh') as psql:
 
 ### OpenWeatherMap, Wunderground, Poverty, and Data.gov
 
-
 Make sure Postgres server is already running!
 ```bash
 start_postgres
 ```
 
-There are several datasets available for the user: openweathermap (weather predictions), wunderground (weather history), download_gov_data (pittsburgh crime data), and poverty. First run:
+The ingestion layer retrieves several raw datasets and makes them available for the user: openweathermap (weather predictions), wunderground (weather history), download_gov_data (pittsburgh crime data), and poverty.
+
+Run:
+```bash
+run_ingestion_layer
+```
+
+This effectively runs all of the following (i.e. there is NO need to run anything further for the *Data Ingestion* section):
+
 ```bash
 cd pulling_data
 python download_gov_data.py
 ```
+
 This has been setup to run with a whitelist of data; the full dataset includes an extremely large volume of unrelated data. If the user wishes to change the data available, they can easily modify the whitelist. download_gov_data.py will pull the data and store it in the pittsburgh database in postgres. Typical run times are around 20 minutes.
 
-Similarly, pull down the supporting data sets:
+Similarly, it will also pull down the supporting data sets:
 ```
 python openweathermap.py
 python wunderground.py
 python poverty.py
 ```
-These will be used for additional follow-on analysis. Historical weather data is from 1990-2017. Weather forecasts are for the five day outlook for predictive analysis. Poverty data for pittsburgh will also be used in the analysis.
+
+These will all be used for additional follow-on analysis. Historical weather data is from 1990-2017. Weather forecasts are for the five day outlook for predictive analysis. Poverty data for pittsburgh will also be used in the analysis.
 
 #### Confirm Data Retrieval
 
@@ -121,29 +130,42 @@ Similarly, the user will be prompted to test the other retrieval program success
 ## Batch Processing
 
 For updating the data, this can be done in batches. Importantly, before running forecasts, be sure to run the batch update for the latest data.this will retrieve updated weather forecasts in addition to any new police data (updated nightly).
+
+Run:
+```
+bash
+run_batch_layer
+```
+
+In particular, this runs the following batch processes to collect data updates, clean the raw data, create live crime incidence forecasts and run ArcGIS analytics. There is NO need to run any of the code in the remainder of the *Batch Processing* section it is for explanatory purposes.
+
+In particular it re-runs openweathermap.py from the ingestion layer then
+
 ```
 cd ~/batch_processing
 python batch.py
 ```
 
+### Machine learned crime incidence forecasts
+
 Crime forecasts will be of interest for law enforcement and city officials.
 ```
-cd ~/batch_processing
 python createforecasts.py
 ```
-This will create forecasts.csv which will be located in /data/forecasts for use in later analysis.
+As well as posting to the database this will also create forecasts.csv which will be located in /data/forecasts for use in later analysis.
 
-
-## Serving Layer
 
 ### Geographic Information System Components (GIS)
 
 To process the data from the Pittsburgh database, run
 ```
-cd gis_ipynb_example
 python arcGISinterface.py
 ```
+
 This process ingests the data and creates resources known as layers and datasets that can be used for geospatial analysis.  These components are stored in an online respository (ESRI ArcGIS online). Further, these resources are published so that they become part of a large searchable repository of GIS features and maps.
+
+
+## Serving Layer
 
 ### Jupyter Notebooks
 
