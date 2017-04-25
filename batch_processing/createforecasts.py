@@ -288,9 +288,9 @@ def main():
             my_str = my_str[:-1]
             myfile.write(my_str + '\n')     
             
-    df = pd.read_csv('temp.csv')
-    df = df.dropnas(how='any')
-    df.to_csv('forecasts.csv')
+    df = pd.read_csv(path + 'temp.csv')
+    df = df.dropna(how='any')
+    df.to_csv(path + 'forecasts.csv')
                                              
     print('Wrote forecasts to files in /data/forecasts')
                                              
