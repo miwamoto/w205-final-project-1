@@ -15,6 +15,63 @@ from sqlalchemy import create_engine
 
 database = 'pittsburgh_clean'
 
+
+table_names = {
+    'allegheny_county_anxiety_medication_0': 'Anxiety Medication 1',
+    'allegheny_county_anxiety_medication_1': 'Anxiety Medication 2',
+    'allegheny_county_boundary_3': 'County Boundary',
+    'allegheny_county_crash_data_15': 'Crash Data',
+    'allegheny_county_depression_medication_0': 'Depression Medication 1',
+    'allegheny_county_depression_medication_1': 'Depression Medication 2',
+    'allegheny_county_diabetes_hospitalization_0': 'Diabetes Hospitalization 0',
+    'allegheny_county_diabetes_hospitalization_1': 'Diabetes Hospitalization 1',
+    'allegheny_county_fatal_accidental_overdoses_1': 'Fatal Accidental Overdoses 1',
+    'allegheny_county_fatal_accidental_overdoses_2': 'Fatal Accidental Overdoses 2',
+    'allegheny_county_hypertension_hospitalization_0': 'Hypertension Hospitalization 0',
+    'allegheny_county_hypertension_hospitalization_1': 'Hypertension Hospitalization 1',
+    'allegheny_county_land_cover_areas_3': 'Land Cover Areas 3',
+    'allegheny_county_median_age_at_death_0': 'Median Age At Death 0',
+    'allegheny_county_median_age_at_death_1': 'Median Age At Death 1',
+    'allegheny_county_municipal_boundaries_3': 'Municipal Boundaries 3',
+    'allegheny_county_obesity_rates_1': 'Obesity Rates 1',
+    'allegheny_county_obesity_rates_2': 'Obesity Rates 2',
+    'allegheny_county_poor_housing_conditions_0': 'Poor Housing Conditions 0',
+    'allegheny_county_poor_housing_conditions_1': 'Poor Housing Conditions 1',
+    'allegheny_county_primary_care_access_0': 'Primary Care Access 0',
+    'allegheny_county_primary_care_access_1': 'Primary Care Access 1',
+    'allegheny_county_smoking_rates_0': 'Smoking Rates 0',
+    'allegheny_county_smoking_rates_1': 'Smoking Rates 1',
+    'allegheny_county_zip_code_boundaries_3': 'Zip Code Boundaries 3',
+    'crime_forecasts': 'Crime Forecasts',
+    'diabetes_0': 'Diabetes 0',
+    'diabetes_1': 'Diabetes 1',
+    'geocoders_0': 'Geocoders 0',
+    'hyperlipidemia_0': 'Hyperlipidemia 0',
+    'hyperlipidemia_1': 'Hyperlipidemia 1',
+    'hypertension_0': 'Hypertension 0',
+    'hypertension_1': 'Hypertension 1',
+    'metatable': 'Metatable',
+    'neighborhoods_with_snap_data_3d3a9_3': 'Neighborhoods With Snap Data',
+    'non_traffic_citations_0': 'Non Traffic citations 0',
+    'pgh_snap_13': 'Snap Data 13',
+    'pgh_snap_14': 'Snap Data 14',
+    'pgh_snap_16': 'Snap Data 16',
+    'pgh_snap_17': 'Snap Data 17',
+    'pgh_snap_18': 'Snap Data 18',
+    'pgh_snap_19': 'Snap Data 19',
+    'pgh_snap_20': 'Snap Data 20',
+    'pittsburgh_police_arrest_data_0': 'Pittsburgh Police Arrest Data',
+    'pittsburgh_police_sectors_5f5e5_3': 'Pittsburgh Police Sectors',
+    'pittsburgh_police_zones_4763f_3': 'Pittsburgh Police Zones',
+    'police_incident_blotter_30_day_0': 'Police Incident Blotter 30 Day',
+    'police_incident_blotter_archive_0': 'Police Incident Blotter Archive 0',
+    'police_incident_blotter_archive_2': 'Police Incident Blotter Archive 2',
+    'poverty': 'Poverty',
+    'tmp': '',
+    'weather': 'Weather',
+    'weather_forecasts': 'Weather Forecasts'
+}
+
 def fetch_tables(search = None, limit = 10):
     with PostgreSQL(database = database) as psql:
         query = "select DISTINCT table_name from information_schema.columns where table_schema = 'public'"
@@ -28,30 +85,13 @@ def fetch_tables(search = None, limit = 10):
 
 
 def plot(table = None, X = None, Y = None, groupby = None, limit = 5000):
-    print('##########')
-    print('##########')
-    print('##########')
-    print('##########')
-    print('##########')
-    print('##########')
-    print('##########')
-    print('##########')
-    print('##########')
-    print('##########')
     colnames, _ = get_col_names(table)
-    print(colnames)
     X = X if X in colnames else None
     Y = Y if Y in colnames else None
-    print(X, Y)
-    print(X, Y)
-    print(X, Y)
-    print(X, Y)
-    print(X, Y)
 
+    print(X, Y)
     if table is not None:
-        print(table)
         df = get_df(cols = [x for x in (X, Y, ) if x is not None], table = table, limit = limit)
-        print(df.head())
     else:
         return 'Please select a table'
 
@@ -117,16 +157,11 @@ def get_df(table, cols = None, limit = None):
             df.columns = list(cols)
     # df = df[list(cols)]
         # df.columns = columns
-    print(df.columns)
-    print(df.columns)
-    print(df.columns)
-    print(df.columns)
-    print(df.columns)
     return df
 
 
 def isNumeric(dtype):
-    if str(dtype) in ('int64', 'float64', 'integer', 'double precision'):
+    if str(dtype) in ('int64', 'float64', 'integer', 'double precision', 'bigint'):
         return True
     else:
         return False
@@ -140,7 +175,30 @@ class Root:
         tables = fetch_tables(search, table_limit)
 
         colnames, dtypes = get_col_names(table)
+        if table == 'weather':
+            for x, y in zip(colnames, dtypes):
+                print(x, y)
         numeric, categorical = split_col_types(table)
+        print('###########')
+        print('###########')
+        print('###########')
+        print('###########')
+        print('###########')
+        print('###########')
+        print('###########')
+        print('###########')
+        print('###########')
+        print('###########')
+        print('###########')
+        print('###########')
+        print('###########')
+        print('###########')
+        print('###########')
+        print('###########')
+        print('###########')
+        print('###########')
+        print('###########')
+        print('###########')
 
 
         return tmpl.render(salutation ='Pittsburgh: ',
@@ -181,17 +239,6 @@ class TableFetcher(object):
 class Plotter(object):
     @cherrypy.tools.accept(media='text/plain')
     def GET(self, table = 'weather', X = None, Y = None, limit = 5000, groupby = None):
-        print(table, X, Y, limit, groupby)
-        print(table, X, Y, limit, groupby)
-        print(table, X, Y, limit, groupby)
-        print(table, X, Y, limit, groupby)
-        print(table, X, Y, limit, groupby)
-        print(table, X, Y, limit, groupby)
-        print(table, X, Y, limit, groupby)
-        print(table, X, Y, limit, groupby)
-        print(table, X, Y, limit, groupby)
-        print(table, X, Y, limit, groupby)
-        print(table, X, Y, limit, groupby)
         html = plot(table, X, Y, limit, groupby)
         return html
 
