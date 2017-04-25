@@ -12,13 +12,13 @@ git pull
 
 ### Mounting volume
 You must mount an EBS volume to store the Postgres database. If you are using the same volume that you used for class, you can just run:
-```
+```bash
 startup
 ```
 to mount the drive (assuming it's in the default location of /dev/xvdf). If this is the initial setup, it will give a warning about directory /data/pittsburgh_db/data which will be created in the next step. Please proceed.
 
 If you are using a new volume, run the following to format the drive at the given location and then mount it:
-```
+```bash
 sudo su
 sh /home/ec2-user/custom/bin/wipe_drive /dev/xvdf
 exit
@@ -27,19 +27,19 @@ exit
 ### Postgres
 
 In order to set up the database, run:
-```
+```bash
 sudo su
 /home/ec2-user/custom/bin/setup_pitts_db
 exit
 ```
 
 This will create a new postgres database and start the server. In the future to start the server, just run:
-```
+```bash
 start_postgres
 ```
 
 Likewise, to stop the server, run:
-```
+```bash
 stop_postgres
 ```
 
@@ -49,14 +49,14 @@ stop_postgres
 
 #### psql
 You can use postgres as normal:
-```
+```bash
 psql -U postgres pittsburgh
 ```
 
-This will bring you to the command prompt for the database `pittsburgh`
+This will bring you to the command prompt for the database `pittsburgh`. Type `\q` to exit.
 
 #### psycopg2
-psycopg2 is installed, and can be used in our Python scripts. However, for simple operations I would recommend using the following:
+psycopg2 and sqlalchemy are both installed, and can be used in our Python scripts. However, for simple operations you can use the following:
 
 #### custom package postgres
 In the custom_python_classes directory is the package `postgres` with one module `PostgreSQL.py` with the class `PostgreSQL`.
@@ -92,14 +92,14 @@ Make sure Postgres server is already running!
 start_postgres
 ```
 
-The ingestion layer retrieves several raw datasets and makes them available for the user: openweathermap (weather predictions), wunderground (weather history), download_gov_data (pittsburgh crime data), and poverty.
+The ingestion layer retrieves several raw datasets and makes them available for the user: openweathermap (weather predictions), wunderground (weather history), download_gov_data (pittsburgh crime data), and poverty (Pittsburgh neighborhood poverty).
 
 Run:
 ```bash
 run_ingestion_layer
 ```
 
-This effectively runs all of the following (i.e. there is NO need to run anything further for the *Data Ingestion* section):
+That command runs all of the following (i.e. there is NO need to run anything further for the *Data Ingestion* section):
 
 ```bash
 cd pulling_data
@@ -132,8 +132,7 @@ Similarly, the user will be prompted to test the other retrieval program success
 For updating the data, this can be done in batches. Importantly, before running forecasts, be sure to run the batch update for the latest data.this will retrieve updated weather forecasts in addition to any new police data (updated nightly).
 
 Run:
-```
-bash
+```bash
 run_batch_layer
 ```
 

@@ -1,38 +1,9 @@
-<h3>Tables</h3>
+<h3>Maps</h3>
 <div id="table_links">
   {% for item in tables %}
   <p><a class="tables link" value="{{ item }}">{{ item }} </a></p>
   {% endfor %}
 </div>
-
-<h3>X Value</h3>
-<div id="X_links">
-  {% for item in X %}
-  <p>
-    <a class="X link" value="{{ item }}">{{ item }} </a>
-  </p>
-  {% endfor %}
-</div>
-
-
-<h3>Y Value</h3>
-<div id="Y_links">
-  {% for item in Y %}
-  <p>
-    <a class="Y link" value="{{ item }}">{{ item }} </a>
-  </p>
-  {% endfor %}
-</div>
-
-<h3>Group By</h3>
-<div id="groupby_links">
-  {% for item in groupby %}
-  <p>
-    <a class="groupby link" value="{{ item }}">{{ item }} </a>
-  </p>
-  {% endfor %}
-</div>
-
 
 <script type="text/javascript">
  $('.tables.link').click(function (event) {

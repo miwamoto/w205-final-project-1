@@ -199,8 +199,6 @@ def infer_types(df, dset):
 
         if col == 'age':
             df[col] = df[col].where(df[col] < MAX_AGE, np.nan)
-                
-
 
 
 def strip_chars(df):
