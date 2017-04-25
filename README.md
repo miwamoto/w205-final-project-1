@@ -100,7 +100,7 @@ The following command will pull down all data from several data sources and stor
 
 The data.gov sources are tracked by their metadata identifiers. The first time running this command will download all data, and store their metadata in the table `metatable` in the `pittsburgh` database. Each subsequent time the batch layer is run, the new metadata is compared against the metadata stored in `metatable` to see if new data is available. If so, it will pull the new data, and ensure there are no duplicates in the table. If the metadata matches what was previously downloaded, that dataset will not be downloaded again.
 
-When possible, separate files from a given dataset are combined into one table (and all duplicates are discarded). If the data are not compatible, they are stored in separate tables.
+When possible, separate files from a given dataset are combined into one table (and all duplicates are discarded). If the data are not compatible, they are stored in separate tables. Data are *NOT* type checked upon download. All data are stored in the initial table as TEXT values only.
 
 Run this command to download all data for the analysis:
 ```bash
@@ -138,7 +138,7 @@ Similarly, the user will be prompted to test the other retrieval program success
 
 ## Batch Processing
 
-For updating the data, this can be done in batches. Importantly, before running forecasts, be sure to run the batch update for the latest data.this will retrieve updated weather forecasts in addition to any new police data (updated nightly).
+For updating the data, this can be done in batches. Importantly, before running forecasts, be sure to run the batch update for the latest data. This will retrieve updated weather forecasts (which are necessary for predicting the next 5 days).
 
 Run:
 ```bash
@@ -147,8 +147,15 @@ run_batch_layer
 
 In particular, this runs the following batch processes to collect data updates, clean the raw data, create live crime incidence forecasts and run ArcGIS analytics. There is NO need to run any of the code in the remainder of the *Batch Processing* section it is for explanatory purposes.
 
-In particular it re-runs openweathermap.py from the ingestion layer then
+The batch layer first re-runs openweathermap.py from the ingestion layer because the forecasts are important for the predictions.
+```
+cd ~/pulling_data
+python openweathermap.py
+```
 
+Next the batch layer runs a command that selects tables of interest, and processes them into a usable form. As previously mentioned, the raw data are stored as TEXT only. This stage does type-checking and conversions in a pseudo-schema-on-read manner. The data stored upstream are relatively unconstrained.
+
+In this stage, we convert numerical values to numerical datatypes. This includes strings that include dollar signs, percentages, and commas, which are not automatically parsed as numbers by pandas. When possible, it splits dates and times into their component parts. Column names are standardized (as much as possible) and particularly obscure ones are converted into human-readable form. Some of this was automated, but much of it was hand-coded to catch specific edge cases.
 ```
 cd ~/batch_processing
 python batch.py
@@ -156,10 +163,11 @@ python batch.py
 
 ### Machine learned crime incidence forecasts
 
-Crime forecasts will be of interest for law enforcement and city officials.
+Crime forecasts will be of interest for law enforcement and city officials. This is just a first step in the development of the classifier, but it endeavors to predict the probability of crime occurring in different neighborhoods in the city of Pittsburgh.
 ```
 python createforecasts.py
 ```
+
 As well as posting to the database this will also create forecasts.csv which will be located in /data/forecasts for use in later analysis.
 
 
