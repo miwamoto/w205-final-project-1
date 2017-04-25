@@ -13,6 +13,11 @@ import os
 import json
 from sqlalchemy import create_engine
 
+clean_engine = create_engine(
+    "postgresql+psycopg2://postgres:postgres@localhost:5432/pittsburgh_clean",
+    isolation_level="READ UNCOMMITTED"
+)
+
 database = 'pittsburgh_clean'
 
 
@@ -85,14 +90,25 @@ def fetch_tables(search = None, limit = 10):
 
 
 def plot(table = None, X = None, Y = None, groupby = None, limit = 5000):
+    print('##############################')
+    print('##############################')
+    print('##############################')
+    print('##############################')
+    print('##############################')
     colnames, _ = get_col_names(table)
     X = X if X in colnames else None
     Y = Y if Y in colnames else None
 
-    if table is not None:
-        df = get_df(cols = [x for x in (X, Y, ) if x is not None], table = table, limit = limit)
-    else:
+    if table is None:
         return 'Please select a table'
+    else:
+        print(X, Y)
+        print('#####')
+        df = get_df(cols = [x for x in (X, Y, ) if x is not None], table = table, limit = limit)
+        print('$$$$$')
+        print(X, Y)
+        print(df.head())
+
 
     if X is None and Y is None:
         return "Please select a value to plot"
@@ -136,6 +152,10 @@ def split_col_types(table):
 
 
 def get_df(table, cols = None, limit = None):
+    print('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')
+    print('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')
+    print('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')
+    print('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')
     colnames, dtypes = get_col_names(table)
     if cols is None:
         columns = "*"
@@ -147,13 +167,25 @@ def get_df(table, cols = None, limit = None):
     else:
         predicates = ''
 
-    with PostgreSQL(database = database, table = table) as psql:
-        # query = "select {} from {}".format(columns, table, )
-        # psql.execute(query)
-        # columns = [col[0] for col in ]
-        df = pd.DataFrame(psql.select(table = table, cols = cols, predicates = predicates))
-        if cols is not None:
-            df.columns = list(cols)
+    df = pd.read_sql(table, clean_engine, columns = cols)
+    # with PostgreSQL(database = database, table = table) as psql:
+    #     # query = "select {} from {}".format(columns, table, )
+    #     # psql.execute(query)
+    #     # columns = [col[0] for col in ]
+    #     df = pd.DataFrame(psql.select(table = table, cols = cols, predicates = predicates))
+    print('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
+    print('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
+    print('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
+    print('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
+    print(cols)
+    print(df.columns)
+    print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+    print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+    print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+    print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+
+    # if cols is not None:
+    #     df.columns = list(cols)
     # df = df[list(cols)]
         # df.columns = columns
     return df
@@ -189,12 +221,14 @@ class Root:
 
     @cherrypy.expose
     def map(self, webmap = '7694ded02a524c97ae145fa3648081a9'):
+        webmap = '461a2d2ddb91480f9f732a90f42a290f'
+        webmap = '461a2d2ddb91480f9f732a90f42a290f'
         webmap = ''.format(webmap)
         env = Environment(loader=FileSystemLoader('templates'))
         tmpl = env.get_template('map.html')
         return tmpl.render(salutation='Pittsburgh: ',
-                           target='Median Age Map',
-                           title = "Median Age",
+                           target='Crime Heatmap',
+                           title = "Crime Heatmap",
                            webmap = webmap,
         )
     
@@ -214,6 +248,7 @@ class TableFetcher(object):
 class Plotter(object):
     @cherrypy.tools.accept(media='text/plain')
     def GET(self, table = 'weather', X = None, Y = None, limit = 5000, groupby = None):
+        print(X, Y)
         html = plot(table, X, Y, limit, groupby)
         return html
 
