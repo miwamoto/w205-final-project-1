@@ -221,15 +221,21 @@ class Root:
 
     @cherrypy.expose
     def map(self, webmap = '7694ded02a524c97ae145fa3648081a9'):
-        webmap = '461a2d2ddb91480f9f732a90f42a290f'
-        webmap = '461a2d2ddb91480f9f732a90f42a290f'
+        maps = ['?', 'Arrest Data']
+        webmaps = ['461a2d2ddb91480f9f732a90f42a290f',
+                   'arrest']
         webmap = ''.format(webmap)
         env = Environment(loader=FileSystemLoader('templates'))
-        tmpl = env.get_template('map.html')
+        if webmap == 'arrest':
+            tmpl = env.get_template('arrest_map.html')
+        else:
+            tmpl = env.get_template('map.html')
+
         return tmpl.render(salutation='Pittsburgh: ',
                            target='Crime Heatmap',
                            title = "Crime Heatmap",
                            webmap = webmap,
+                           tables = zip(maps, webmaps),
         )
     
 class TableFetcher(object):

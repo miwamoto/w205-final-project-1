@@ -1,21 +1,13 @@
 <h3>Maps</h3>
 <div id="table_links">
-  {% for item in tables %}
-  <p><a class="tables link" value="{{ item }}">{{ item }} </a></p>
+  {% for n, item in tables %}
+  <p><a class="tables link" value="{{ item }}">{{ n }} </a></p>
   {% endfor %}
 </div>
 
 <script type="text/javascript">
  $('.tables.link').click(function (event) {
      event.preventDefault();
-     append_to_url('table', $(this).attr('value') ); return false;
-});
- $('.X.link').click(function (event) {
-     event.preventDefault();
-     append_to_url('X', $(this).attr('value') ); return false;
-});
- $('.Y.link').click(function (event) {
-     event.preventDefault();
-     append_to_url('Y', $(this).attr('value') ); return false;
+     append_to_url([['webmap', $(this).attr('value') ]]); return false;
 });
 </script>

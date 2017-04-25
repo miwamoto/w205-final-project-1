@@ -150,7 +150,7 @@ var table_names = {
      } 
 
      function append_to_url(keyvals) {
-	 var url = window.location.origin;
+	 var url = window.location.origin + window.location.pathname;
 	 var params = get_search_params();
 	 for(var i = 0; i < keyvals.length; i++) {
 	     var key = keyvals[i][0];
