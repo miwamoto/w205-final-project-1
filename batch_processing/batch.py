@@ -267,3 +267,16 @@ for i, dset in enumerate(good_datasets):
         
         df.to_sql(dset, clean_engine, if_exists = 'replace', index = False)
 
+    if 'poverty' in good_datasets and 'non_traffic_citations_0' in good_datasets:
+        with PostgreSQL(database = 'pittsburgh_clean') as psql:
+            try:
+                psql.execute('drop table citations_poverty')
+            except:
+                psql.conn.rollback()
+            try:
+                psql.execute('create table citations_poverty as \
+                            select * from non_traffic_citations_0 c \
+                            inner join poverty p \
+                            using (neighborhood)')
+            except:
+                psql.conn.rollback()
