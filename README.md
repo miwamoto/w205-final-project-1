@@ -131,7 +131,7 @@ Crime forecasts will be of interest for law enforcement and city officials.
 cd ~/batch_processing
 python createforecasts.py
 ```
-This will create two files, forecasts.csv and random_forecasts.csv, which will be located in /data/forecasts for use in later analysis.
+This will create forecasts.csv which will be located in /data/forecasts for use in later analysis.
 
 
 ## Serving Layer
@@ -147,8 +147,11 @@ This process ingests the data and creates resources known as layers and datasets
 
 ### Jupyter Notebooks
 
-There are two jupyter notbooks available: GIS and forecasts. 
-The GIS notebook, `Interacting_with_Pittsburgh_Data_with_Jupyter_and_ArcGIS.ipynb` demonstrates how the GIS resources created in the process above can be used for analysis with Python and its associated tools such as pandas, NumPy and SciPy. You can read more about this API for Python at `https://developers.arcgis.com/python/` To view the example notebook, start Jupyter notebook as indicated below.
+There is one jupyter notebooks available for GIS.
+
+The GIS notebook, `Interacting_with_Pittsburgh_Data_with_Jupyter_and_ArcGIS.ipynb` demonstrates how the GIS resources created in the process above can be used for analysis with Python and its associated tools such as pandas, NumPy and SciPy. 
+
+You can read more about this API for Python at `https://developers.arcgis.com/python/` To view the example notebook, start Jupyter notebook as indicated below.
 
 ```
 cd gis_ipynb_example 
